@@ -1,0 +1,32 @@
+---
+- name: Update packages and add new user
+  hosts: all
+  become: true
+  become_user: amrkedra
+  gather_facts: true
+
+  tasks:
+    # - name: copy the key to the nodes
+    #   ansible.builtin.copy:
+    #     dest: /.ssh
+    #     src: /home/amrkedra/First-DevOps-Repo-For-Organization/Ansible/local-ssh-key.pub
+    
+    - name: Update cache
+      ansible.builtin.yum:
+        update_cache: yes
+        state: latest
+
+    - name: Add user
+      ansible.builtin.user:
+        name: amrkedra
+        group: root
+      register: user_creation_result
+
+
+    - name: Add sudoers file
+      ansible.builtin.copy:
+        src: sudoer-amrkedra
+        dest: /etc/sudoers.d/amrkedra
+        owner: root
+        group: root
+        mode: '0440'

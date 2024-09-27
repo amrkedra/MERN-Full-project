@@ -1,0 +1,59 @@
+---
+# tasks file for kubernetes
+# - name: Install required packages
+#   apt:
+#     name:
+#       - apt-transport-https
+#       - ca-certificates
+#       - curl
+#       - software-properties-common
+#       - docker.io
+#     state: present
+#     update_cache: yes
+#   become: yes
+
+# - name: Add Kubernetes GPG key
+#   apt_key:
+#     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+#     state: present
+#   become: yes
+
+# - name: Add Kubernetes repository
+#   apt_repository:
+#     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+#     state: present
+#   become: yes
+#   ignore_errors: yes
+
+# - name: Install kubeadm, kubelet, and kubectl
+#   apt:
+#     name:
+#       - kubelet
+#       - kubeadm
+#       - kubectl
+#     state: present
+#     update_cache: yes
+#   become: yes
+
+
+- name: Reset the Kubernetes cluster on the master node
+  command: sudo kubeadm reset -f
+  become: yes
+  when: inventory_hostname in groups['masters'] and master_already_initialized.stat.exists
+  ignore_errors: yes
+
+- name: Initialize Kubernetes master
+  command: sudo kubeadm init --ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-apiserver.yaml,FileAvailable--etc-kubernetes-manifests-kube-controller-manager.yaml,FileAvailable--etc-kubernetes-manifests-kube-scheduler.yaml,FileAvailable--etc-kubernetes-manifests-etcd.yaml
+  become: yes
+  when: inventory_hostname in groups['masters']
+  register: master_initialize_succeed
+
+
+- name: Join Kubernetes worker to cluster
+  command: kubeadm join 192.168.1.4:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash>
+  become: yes
+  when: >
+    inventory_hostname in groups['workers'] and
+    master_initialize_succeed is defined and
+    master_initialize_succeed.rc == 0
+  ignore_errors: yes

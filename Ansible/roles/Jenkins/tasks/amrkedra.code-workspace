@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "amrkedra",
+			"path": "../../../../../.ansible/collections/ansible_collections/amrkedra"
+		}
+	],
+	"settings": {
+		"ansible.python.interpreterPath": "/usr/bin/python3"
+	}
+}

@@ -1,0 +1,133 @@
+- name: Install & start nginx
+  tags: nginx
+  hosts: all
+  become: on
+  roles:
+    - nginx
+
+# - name: practice lineinfile
+#   tags: line
+#   hosts: all
+#   become: on
+#   tasks:
+#   - name:
+#     ansible.builtin.lineinfile:
+#       path: /usr/test.sh
+#       create:  on
+#       mode: 722
+#       line: echo "this is test print"
+
+
+# - name: install-kubernetes
+#   tags: kubernetes
+#   hosts: kubernetes-server
+#   become: true
+#   tasks:
+#   - name: Install Kubernetes
+#     ansible.builtin.package:
+#       name: kubernetes
+#       state: latest
+
+# - name: copy-git-repo
+#   tags: git
+#   hosts: copy-git-repo
+#   become: true
+#   tasks:
+#   - name: Copy Git repo
+#     ansible.builtin.git:
+#       dest: /home/ubuntu-server1/AWS
+#       repo: https://github.com/verma-kunal/AWS-Session.git
+#       clone: yes
+#       force: yes
+
+# - name: install-DB
+#   tags: db
+#   hosts: db-servers
+#   become: true
+#   tasks:
+#   - name: Install MariaDB server & ansible
+#     ansible.builtin.package:
+#       name:
+#       - mariadb-server
+#       - ansible
+#       state: latest
+
+# - name: copy from server to nodes
+#   tags: copy
+#   hosts: copy-servers
+#   become: true
+#   tasks:
+#   - ansible.builtin.copy:
+#       src: /home/amrkedra/Downloads/GitHub_API_Collection_2023.json
+#       dest: /home/copied-folder/
+#       mode: 644
+#       group: root
+#       remote_src: no
+
+# - name: install unzip + terraform
+#   tags: terraform
+#   hosts: terraform
+#   become: on
+#   tasks:
+#   - name: install unzip
+#     ansible.builtin.package:
+#       name: unzip
+#       state: latest
+
+#   - name: download terraform
+#     ansible.builtin.get_url:
+#       url: https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip
+#       dest: /tmp/terraform.zip
+
+#   - name: extract terraform archive
+#     ansible.builtin.unarchive:
+#       src: /tmp/terraform.zip
+#       dest: /usr/local/bin/
+#       remote_src: on
+#       creates: /usr/local/bin/terraform
+
+#   - name: set exuctable permission
+#     ansible.builtin.file:
+#       path: /usr/local/bin/terraform
+#       mode: 741
+
+
+# - name: ping all hosts
+#   hosts: never
+#   become: on
+#   tasks:
+#   - name:
+#     ansible.builtin.ping:
+#     tags: never
+    
+
+
+# - name: create amrkedra user
+#   tags: user
+#   hosts: all
+#   become: true
+#   tasks:
+#   - name:
+#     ansible.builtin.user:
+#       name: amrkedra
+#       groups: root
+
+
+# - name: add sudoers file to the user
+#   tags: user
+#   hosts: all
+#   become: on
+#   tasks:
+#     - name:
+#       ansible.builtin.copy:
+#         src: sudoer-amrkedra
+#         dest: /etc/sudoers.d/amrkedra
+#         owner: root
+#         group: root
+#         mode: 440
+
+# - name: install promethus
+#   hosts: local
+#   tags: promethus
+#   roles:
+#   - promethus 

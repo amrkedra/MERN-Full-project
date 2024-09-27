@@ -1,0 +1,12 @@
+---
+# tasks file for nginx
+
+- name: install Nginx
+  ansible.builtin.package:
+    name: nginx
+    state: latest
+  
+- name: start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started

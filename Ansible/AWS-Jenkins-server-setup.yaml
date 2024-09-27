@@ -1,0 +1,113 @@
+- name: Setup-Jenkins-Server
+  hosts: AWS-Jenkins-Server
+  become: true
+  vars:
+    nginx_user: nginx
+    nginx_conf_dir: /etc/nginx
+
+  tasks:
+  - name: Update package list
+    ansible.builtin.apt:
+      update_cache: yes
+    become: true
+
+  - name: copy JDK file
+    ansible.builtin.copy:
+      src: ./jdk-22_linux-x64_bin.deb
+      dest: /home/
+      owner: amrkedra
+      group: amrkedra
+      mode: '0755'
+
+  - name: Install JDK
+    ansible.builtin.shell:
+      cmd: |
+        dpkg -i /home/jdk-22_linux-x64_bin.deb
+        apt-get install -f
+    become: true
+
+  - name: Download Jenkins GPG key
+    ansible.builtin.apt_key:
+      url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+      state: present
+      keyring: /usr/share/keyrings/jenkins-keyring.asc
+
+  - name: Add Jenkins repository to sources list
+    ansible.builtin.apt_repository:
+      repo: 'deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/'
+      state: present
+      filename: 'jenkins.list'
+
+  - name: Update APT package index
+    ansible.builtin.apt:
+      update_cache: yes
+
+  - name: Install Jenkins
+    ansible.builtin.apt:
+      name: jenkins
+      state: present
+  
+  - name: Install Docker
+    ansible.builtin.apt:
+      name: docker.io
+      state: present
+
+  - name: add the needed permissions
+    ansible.builtin.shell: |
+      usermod -aG docker jenkins
+      usermod -aG docker ubuntu
+      systemctl restart docker
+      chmod 777 /var/run/docker.sock
+    args:
+      warn: false
+    
+  - name: Run SonarQube
+    ansible.builtin.shell:
+      docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
+
+
+  - name: Install AWS CLI
+    ansible.builtin.shell: |
+      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      sudo apt install unzip -y
+      unzip awscliv2.zip
+      sudo ./aws/install 
+
+  - name: Install Kubectl
+    ansible.builtin.shell: |
+      curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+      sudo mv /tmp/eksctl /usr/local/bin
+      eksctl version
+      
+  - name: Download HashiCorp GPG key
+    ansible.builtin.shell: |
+      wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    args:
+      warn: false
+      
+  - name: Add HashiCorp repository to sources list
+    ansible.builtin.apt_repository:
+      repo: "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_lsb.codename }} main"
+      state: present
+      filename: 'hashicorp.list' 
+
+  - name: Update package index
+    ansible.builtin.apt:
+      update_cache: yes
+
+  - name: Install Terraform 
+    ansible.builtin.apt:
+      name: terraform
+      state: present  
+      
+  - name: Install Trivy
+    ansible.builtin.shell: |
+      sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+      wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+      echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+      sudo apt update
+      sudo apt install trivy -y
+
+  - name: Install Helm
+    ansible.builtin.shell:
+      sudo snap install helm --classic

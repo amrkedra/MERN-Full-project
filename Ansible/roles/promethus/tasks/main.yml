@@ -1,0 +1,45 @@
+
+  - name: add prometheus group
+    ansible.builtin.group:
+      local: false
+      name: prometheus
+      non_unique: false
+      state: present
+      system: true
+
+  - name: add user
+    ansible.builtin.user:
+      name: prometheus
+      shell: /sbin/nologin
+      system: true
+      group: prometheus
+
+  - name: Create Directories for Prometheus
+    ansible.builtin.file:
+      path:
+        - /etc/prometheus
+        - /var/lib/prometheus
+      owner:
+        - root
+        - amrkedra
+      state: directory
+      mode: 0740
+
+  - name: Download Prometheus and Extract Files
+    ansible.builtin.copy:
+      remote_src: true
+      src: https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz
+      dest: /tmp/prometheus/
+
+  - name: unzip the downloaded file
+    ansible.builtin.unarchive:
+      copy: true
+      creates: /tmp/prometheus
+      decrypt: true
+      dest: /tmp/prometheus/
+      group:
+        - amrkedra
+        - root
+      mode: 0755
+      owner: amrkedra
+      src: /tmp/prometheus

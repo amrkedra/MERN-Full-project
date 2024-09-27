@@ -1,0 +1,19 @@
+- name: Update package list
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true
+
+- name: copy JDK file
+  ansible.builtin.copy:
+    src: ./jdk-22_linux-x64_bin.deb
+    dest: /home/
+    owner: amrkedra
+    group: amrkedra
+    mode: '0755'
+
+- name: Install JDK
+  ansible.builtin.shell:
+    cmd: |
+      dpkg -i /home/jdk-22_linux-x64_bin.deb
+      apt-get install -f
+  become: true

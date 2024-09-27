@@ -1,0 +1,11 @@
+---
+# tasks file for docker
+- name: install_docker
+  ansible.builtin.package:
+    name: docker
+    state: latest
+    gather_facts: no
+    skip_errors: yes
+    tags: docker
+
+    
