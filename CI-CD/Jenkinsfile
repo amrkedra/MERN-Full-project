@@ -1,8 +1,8 @@
 pipeline {
-    agent { label 'master' }
+    agent { label 'master' } 
 
     stages {
-        stage('Clone the Repo & Go to Terraform Folder') {
+        stage("Clone the Repo & Go to Terraform Folder") {
             steps {
                 script {
                     // Clone the repository
@@ -10,7 +10,7 @@ pipeline {
                     
                     // Change directory to Terraform
                     dir('MERN-Full-project/Terraform') {
-                        // Now you can run Terraform commands here
+                        // Run Terraform commands here
                     }
                 }
             }
@@ -19,10 +19,11 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    def tfHome = tool name: 'Terraform 40926', type: 'TerraformInstallation'
-                    env.PATH = "${tfHome}:${env.PATH}"
-                    sh 'terraform --version'
-                    sh 'terraform init'
+                    // Use the shell to run Terraform init
+                    sh '''
+                    terraform --version
+                    terraform init
+                    '''
                 }
             }
         }
@@ -30,6 +31,7 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
+                    // Run Terraform plan
                     sh 'terraform plan'
                 }
             }
@@ -39,6 +41,7 @@ pipeline {
             steps {
                 input 'Approve Terraform Apply?'
                 script {
+                    // Run Terraform apply
                     sh 'terraform apply -auto-approve'
                 }
             }
@@ -47,9 +50,8 @@ pipeline {
 
     post {
         always {
-            node('master') { // Specify the agent label here
-                archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
-            }
+            // Archive Terraform state file
+            archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
         }
     }
 }
