@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Set the Terraform home path
-        TF_HOME = tool name: 'Terraform 1.0', type: 'TerraformInstallation'
+        TF_HOME = tool name: 'Terraform 40926', type: 'TerraformInstallation'
     }
 
     stages {
