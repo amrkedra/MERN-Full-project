@@ -1,22 +1,16 @@
 pipeline {
-    agent { label "master" }
-
-    environment {
-        // Set the Terraform home path
-        TF_HOME = tool name: 'Terraform 40926', type: 'TerraformInstallation'
-    }
+    agent { label 'master' }
 
     stages {
-        stage("Clone the Repo & Go to Terraform Folder") {
+        stage('Clone the Repo & Go to Terraform Folder') {
             steps {
                 script {
                     // Clone the repository
                     git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
-
+                    
                     // Change directory to Terraform
                     dir('MERN-Full-project/Terraform') {
-                        // Print current directory to confirm
-                        sh 'pwd'
+                        // Now you can run Terraform commands here
                     }
                 }
             }
@@ -25,13 +19,9 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    // Set Terraform binary in the PATH
-                    env.PATH = "${TF_HOME}:${env.PATH}"
-                    
-                    // Print Terraform version to verify
+                    def tfHome = tool name: 'Terraform 40926', type: 'TerraformInstallation'
+                    env.PATH = "${tfHome}:${env.PATH}"
                     sh 'terraform --version'
-                    
-                    // Run Terraform init
                     sh 'terraform init'
                 }
             }
@@ -40,7 +30,6 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
-                    // Run Terraform plan
                     sh 'terraform plan'
                 }
             }
@@ -50,7 +39,6 @@ pipeline {
             steps {
                 input 'Approve Terraform Apply?'
                 script {
-                    // Run Terraform apply with auto-approve
                     sh 'terraform apply -auto-approve'
                 }
             }
@@ -59,8 +47,9 @@ pipeline {
 
     post {
         always {
-            // Archive the Terraform state file
-            archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+            node {
+                archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+            }
         }
     }
 }
