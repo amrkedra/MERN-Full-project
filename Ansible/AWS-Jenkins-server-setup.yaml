@@ -122,3 +122,4 @@
     ansible.builtin.apt:
       name: git
       state: present
+    ignore_errors: yes
