@@ -7,10 +7,16 @@ pipeline {
                 script {
                     // Clone the repository
                     git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
-                    
-                    // Change directory to Terraform
-                    dir('Terraform') {
-                        // Now you can run Terraform commands here
+                }
+            }
+        }
+
+        stage("List Terraform Directory") {
+            steps {
+                script {
+                    dir('MERN-Infra-providing/Terraform') {
+                        // List the contents of the Terraform directory
+                        sh 'ls -la'
                     }
                 }
             }
@@ -20,7 +26,9 @@ pipeline {
             steps {
                 script {
                     // Run Terraform init
-                    sh 'terraform init --upgrade'
+                    dir('MERN-Infra-providing/Terraform') {
+                        sh 'terraform init --upgrade'
+                    }
                 }
             }
         }
@@ -29,7 +37,9 @@ pipeline {
             steps {
                 script {
                     // Run Terraform plan
-                    sh 'terraform plan'
+                    dir('Terraform') {
+                        sh 'terraform plan'
+                    }
                 }
             }
         }
@@ -43,19 +53,21 @@ pipeline {
                         [$class: 'AmazonWebServicesCredentials', credentialsId: 'aws-creds']
                     ]) {
                         // Run Terraform apply
-                        sh 'terraform apply -auto-approve'
+                        dir('MERN-Infra-providing/Terraform') {
+                            sh 'terraform apply -auto-approve'
+                        }
                     }
                 }
             }
         }
     }
 
-    // post {
-    //     always {
-    //         script {
-    //             // Archive Terraform state files
-    //             archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
-    //         }
-    //     }
-    // }
+    post {
+        always {
+            script {
+                // Archive Terraform state files
+                archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+            }
+        }
+    }
 }
