@@ -1,11 +1,5 @@
 pipeline {
-    agent { label "master" }
-
-    environment {
-        AWS_ACCESS_KEY_ID = credentials('Access Key ID') // Your Access Key ID credential ID
-        AWS_SECRET_ACCESS_KEY = credentials('Secret Access Key') // Your Secret Access Key credential ID
-        AWS_DEFAULT_REGION = 'me-south-1' // Optional: Set your desired AWS region
-    }
+    agent any
 
     stages {
         stage("Clone the Repo & Go to Terraform Folder") {
@@ -44,22 +38,24 @@ pipeline {
             steps {
                 input 'Approve Terraform Apply?'
                 script {
-                    // Run Terraform apply
-                    sh 'terraform apply -auto-approve'
+                    // Use AWS credentials from Jenkins credentials store
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentials', credentialsId: 'aws-creds']
+                    ]) {
+                        // Run Terraform apply
+                        sh 'terraform apply -auto-approve'
+                    }
                 }
             }
         }
     }
 
-    post {
-        always {
-            // Ensure this step runs within a node context
-            script {
-                node {
-                    // Archive Terraform state files
-                    archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
-                }
-            }
-        }
-    }
+    // post {
+    //     always {
+    //         script {
+    //             // Archive Terraform state files
+    //             archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+    //         }
+    //     }
+    // }
 }
