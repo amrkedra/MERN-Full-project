@@ -19,6 +19,13 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
+                    def tfHome = tool name: 'Terraform 1.0', type: 'TerraformInstallation'
+                    env.PATH = "${tfHome}:${env.PATH}"
+                    sh 'terraform --version'
+                    
+                }
+            steps {
+                script {
                     terraform.init()
                 }
             }
