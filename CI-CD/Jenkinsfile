@@ -5,22 +5,20 @@ pipeline {
         stage("Clone the Repo & Go to Terraform Folder") {
             steps {
                 script {
-                    // Clone the repository
+                    // Remove the existing directory if it exists
+                    sh 'rm -rf MERN-Infra-providing'
+                    
+                    // Clone the repository from the remote
                     git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
+                    
+                    // Change directory to Terraform
+                    dir('Terraform') {
+                        // Now you can run Terraform commands here
                 }
             }
         }
 
-        stage("List Terraform Directory") {
-            steps {
-                script {
-                    dir('Terraform') {
-                        // List the contents of the Terraform directory
-                        sh 'ls -la'
-                    }
-                }
-            }
-        }
+        
 
         stage('Terraform Init') {
             steps {
