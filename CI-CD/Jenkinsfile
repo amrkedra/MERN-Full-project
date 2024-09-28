@@ -1,5 +1,11 @@
 pipeline {
-    agent { label 'master' } 
+    agent { label "master" }
+
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // Your Access Key ID credential ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Your Secret Access Key credential ID
+        AWS_DEFAULT_REGION = 'me-south-1' // Optional: Set your desired AWS region
+    }
 
     stages {
         stage("Clone the Repo & Go to Terraform Folder") {
@@ -9,8 +15,8 @@ pipeline {
                     git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
                     
                     // Change directory to Terraform
-                    dir('MERN-Full-project/Terraform') {
-                        // Run Terraform commands here
+                    dir('MERN-Infra-providing/Terraform') {
+                        // Now you can run Terraform commands here
                     }
                 }
             }
@@ -19,11 +25,8 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    // Use the shell to run Terraform init
-                    sh '''
-                    terraform --version
-                    terraform init
-                    '''
+                    // Run Terraform init
+                    sh 'terraform init --upgrade'
                 }
             }
         }
@@ -50,7 +53,7 @@ pipeline {
 
     post {
         always {
-            // Archive Terraform state file
+            // Archive Terraform state files
             archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
         }
     }
