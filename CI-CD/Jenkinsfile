@@ -13,29 +13,28 @@ pipeline {
                 script {
                     // Clone the repository
                     git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
-                    
-                    // Change directory to Terraform
-                    dir('MERN-Infra-providing/Terraform') {
-                        // Now you can run Terraform commands here
-                    }
                 }
             }
         }
 
         stage('Terraform Init') {
             steps {
-                script {
-                    // Run Terraform init
-                    sh 'terraform init --upgrade'
+                dir('MERN-Infra-providing/Terraform') {  // Ensure you're in the right directory
+                    script {
+                        // Run Terraform init
+                        sh 'terraform init --upgrade'
+                    }
                 }
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                script {
-                    // Run Terraform plan
-                    sh 'terraform plan'
+                dir('MERN-Infra-providing/Terraform') {  // Ensure you're in the right directory
+                    script {
+                        // Run Terraform plan
+                        sh 'terraform plan'
+                    }
                 }
             }
         }
@@ -43,9 +42,11 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 input 'Approve Terraform Apply?'
-                script {
-                    // Run Terraform apply
-                    sh 'terraform apply -auto-approve'
+                dir('MERN-Infra-providing/Terraform') {  // Ensure you're in the right directory
+                    script {
+                        // Run Terraform apply
+                        sh 'terraform apply -auto-approve'
+                    }
                 }
             }
         }
