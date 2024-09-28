@@ -1,5 +1,10 @@
 pipeline {
-    agent {label "master"} 
+    agent { label "master" }
+
+    environment {
+        // Set the Terraform home path
+        TF_HOME = tool name: 'Terraform 1.0', type: 'TerraformInstallation'
+    }
 
     stages {
         stage("Clone the Repo & Go to Terraform Folder") {
@@ -7,10 +12,11 @@ pipeline {
                 script {
                     // Clone the repository
                     git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
-                    
+
                     // Change directory to Terraform
                     dir('MERN-Full-project/Terraform') {
-                        // Now you can run Terraform commands here
+                        // Print current directory to confirm
+                        sh 'pwd'
                     }
                 }
             }
@@ -19,14 +25,14 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    def tfHome = tool name: 'Terraform 1.0', type: 'TerraformInstallation'
-                    env.PATH = "${tfHome}:${env.PATH}"
+                    // Set Terraform binary in the PATH
+                    env.PATH = "${TF_HOME}:${env.PATH}"
+                    
+                    // Print Terraform version to verify
                     sh 'terraform --version'
                     
-                }
-            steps {
-                script {
-                    terraform.init()
+                    // Run Terraform init
+                    sh 'terraform init'
                 }
             }
         }
@@ -34,7 +40,8 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
-                    terraform.plan()
+                    // Run Terraform plan
+                    sh 'terraform plan'
                 }
             }
         }
@@ -43,7 +50,8 @@ pipeline {
             steps {
                 input 'Approve Terraform Apply?'
                 script {
-                    terraform.apply()
+                    // Run Terraform apply with auto-approve
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
@@ -51,9 +59,8 @@ pipeline {
 
     post {
         always {
+            // Archive the Terraform state file
             archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
         }
     }
 }
-
-// Note: Ensure that your Jenkinsfile is placed in the root of the main branch.
