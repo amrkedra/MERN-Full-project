@@ -1,5 +1,5 @@
 - name: Setup-Jenkins-Server
-  hosts: AWS-Jenkins-Server
+  hosts: local
   become: true
   vars:
     nginx_user: nginx
@@ -56,12 +56,17 @@
       chmod 777 /var/run/docker.sock
     
     
-  - name: Run SonarQube
+  - name: Run SonarQube in Docker
     ansible.builtin.shell:
       docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
     async: 200  # Set a timeout for 5 minutes
     poll: 0     # Don't wait for completion
     ignore_errors: true
+
+  - name: Make sure Sonar container is Running
+    ansible.builtin.shell:
+      docker start sonar
+    ignore_errors: yes
 
 
   - name: Install AWS CLI
@@ -70,6 +75,7 @@
       sudo apt install unzip -y
       unzip awscliv2.zip
       sudo ./aws/install 
+    ignore_errors: yes
 
   - name: Install Kubectl
     ansible.builtin.shell: |
@@ -80,23 +86,26 @@
   - name: Download HashiCorp GPG key
     ansible.builtin.shell: |
       wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-    
+    ignore_errors: yes
       
   - name: Add HashiCorp repository to sources list
     ansible.builtin.apt_repository:
       repo: "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_lsb.codename }} main"
       state: present
       filename: 'hashicorp.list' 
+    ignore_errors: yes
 
   - name: Update package index
     ansible.builtin.apt:
       update_cache: yes
 
+
   - name: Install Terraform 
     ansible.builtin.apt:
       name: terraform
       state: present  
-      
+    ignore_errors: yes
+
   - name: Install Trivy
     ansible.builtin.shell: |
       sudo apt-get install wget apt-transport-https gnupg lsb-release -y
@@ -108,3 +117,8 @@
   - name: Install Helm
     ansible.builtin.shell:
       sudo snap install helm --classic
+
+  - name: Install Git
+    ansible.builtin.apt:
+      name: git
+      state: present

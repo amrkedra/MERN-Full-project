@@ -1,0 +1,52 @@
+pipeline {
+    agent {label "master"} 
+
+    stages {
+
+        stages {
+        stage("Clone the Repo & Go to Terraform Folder") {
+            steps {
+                script {
+                    // Clone the repository
+                    git 'https://github.com/amrkedra/MERN-Full-project.git'
+                    
+                    // Change directory to Terraform
+                    dir('MERN-Full-project/Terraform') {
+                        // Now you can run Terraform commands here
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                script {
+                    terraform.init()
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    terraform.plan()
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                input 'Approve Terraform Apply?'
+                script {
+                    terraform.apply()
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+        }
+    }
+}
