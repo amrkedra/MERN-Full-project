@@ -9,7 +9,7 @@ pipeline {
                     git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
                     
                     // Change directory to Terraform
-                    dir('MERN-Infra-providing/Terraform') {
+                    dir('Terraform') {
                         // Now you can run Terraform commands here
                     }
                 }
