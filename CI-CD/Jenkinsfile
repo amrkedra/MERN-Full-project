@@ -13,28 +13,29 @@ pipeline {
                 script {
                     // Clone the repository
                     git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
+                    
+                    // Change directory to Terraform
+                    dir('MERN-Infra-providing/Terraform') {
+                        // Now you can run Terraform commands here
+                    }
                 }
             }
         }
 
         stage('Terraform Init') {
             steps {
-                dir('MERN-Infra-providing/Terraform') {  // Ensure you're in the right directory
-                    script {
-                        // Run Terraform init
-                        sh 'terraform init --upgrade'
-                    }
+                script {
+                    // Run Terraform init
+                    sh 'terraform init --upgrade'
                 }
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                dir('MERN-Infra-providing/Terraform') {  // Ensure you're in the right directory
-                    script {
-                        // Run Terraform plan
-                        sh 'terraform plan'
-                    }
+                script {
+                    // Run Terraform plan
+                    sh 'terraform plan'
                 }
             }
         }
@@ -42,11 +43,9 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 input 'Approve Terraform Apply?'
-                dir('MERN-Infra-providing/Terraform') {  // Ensure you're in the right directory
-                    script {
-                        // Run Terraform apply
-                        sh 'terraform apply -auto-approve'
-                    }
+                script {
+                    // Run Terraform apply
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
@@ -54,8 +53,13 @@ pipeline {
 
     post {
         always {
-            // Archive Terraform state files
-            archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+            // Ensure this step runs within a node context
+            script {
+                node {
+                    // Archive Terraform state files
+                    archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+                }
+            }
         }
     }
 }
