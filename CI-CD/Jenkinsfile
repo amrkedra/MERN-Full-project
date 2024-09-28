@@ -1,12 +1,12 @@
 pipeline {
-    agent { label "master" } 
+    agent {label "master"} 
 
     stages {
         stage("Clone the Repo & Go to Terraform Folder") {
             steps {
                 script {
                     // Clone the repository
-                    git 'https://github.com/amrkedra/MERN-Full-project.git'
+                    git branch: 'main', url: 'https://github.com/amrkedra/MERN-Full-project.git'
                     
                     // Change directory to Terraform
                     dir('MERN-Full-project/Terraform') {
@@ -19,7 +19,6 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    // Initialize Terraform
                     terraform.init()
                 }
             }
@@ -28,7 +27,6 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
-                    // Plan Terraform changes
                     terraform.plan()
                 }
             }
@@ -38,7 +36,6 @@ pipeline {
             steps {
                 input 'Approve Terraform Apply?'
                 script {
-                    // Apply Terraform changes
                     terraform.apply()
                 }
             }
@@ -47,8 +44,9 @@ pipeline {
 
     post {
         always {
-            // Archive Terraform state files
             archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
         }
     }
 }
+
+// Note: Ensure that your Jenkinsfile is placed in the root of the main branch.
