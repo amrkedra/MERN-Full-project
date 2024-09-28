@@ -2,7 +2,8 @@
 - name: Update packages and add new user
   hosts: all
   become: true
-  become_user: amrkedra
+  become_user: root
+  become_method: sudo
   gather_facts: true
 
   tasks:
@@ -12,9 +13,9 @@
     #     src: /home/amrkedra/First-DevOps-Repo-For-Organization/Ansible/local-ssh-key.pub
     
     - name: Update cache
-      ansible.builtin.yum:
+      ansible.builtin.apt:
         update_cache: yes
-        state: latest
+        state: present
 
     - name: Add user
       ansible.builtin.user:
