@@ -14,7 +14,7 @@ pipeline {
         stage("List Terraform Directory") {
             steps {
                 script {
-                    dir('MERN-Infra-providing/Terraform') {
+                    dir('Terraform') {
                         // List the contents of the Terraform directory
                         sh 'ls -la'
                     }
