@@ -34,35 +34,40 @@ pipeline {
         }
 
         stage('Terraform Plan') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'AWS-Creds']]) {
-                    script {
-                        dir('Terraform') {
-                            sh 'terraform plan'
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Terraform Apply') {
-            steps {
-                input 'Approve Terraform Apply?'
-                script {
-                    // Use AWS credentials from Jenkins credentials store
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentials', credentialsId: 'aws-creds']
-                    ]) {
-                        // Run Terraform apply
-                        dir('MERN-Infra-providing/Terraform') {
-                            sh 'terraform apply -auto-approve'
-                        }
-                    }
+    steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                          credentialsId: 'AWS-Creds']]) {
+            script {
+                dir('Terraform') {
+                    sh '''
+                        export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+                        export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                        terraform init -reconfigure
+                        terraform plan
+                    '''
                 }
             }
         }
     }
+}
+
+        stage('Terraform Apply') {
+    steps {
+        input 'Approve Terraform Apply?'
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                          credentialsId: 'aws-creds']]) {
+            script {
+                dir('MERN-Infra-providing/Terraform') {
+                    sh '''
+                        export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+                        export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                        terraform apply -auto-approve
+                    '''
+                }
+            }
+        }
+    }
+}
 
     post {
         always {
