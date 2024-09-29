@@ -49,7 +49,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                input 'Approve Terraform Apply?'
+                
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
                                   credentialsId: 'aws-creds']]) {
                     script {
