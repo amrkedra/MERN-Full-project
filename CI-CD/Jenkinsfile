@@ -25,7 +25,7 @@ pipeline {
                 script {
                     // Run Terraform init
                     dir('MERN-Infra-providing/Terraform') {
-                        sh 'terraform init --migrate-state'
+                        sh 'terraform init -reconfigure'
                     }
                 }
             }
