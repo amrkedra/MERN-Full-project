@@ -24,7 +24,7 @@ pipeline {
             steps {
                 script {
                     // Run Terraform init
-                    dir('MERN-Infra-providing/Terraform') {
+                    dir('Terraform') {
                         sh 'terraform init -reconfigure'
                     }
                 }
