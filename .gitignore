@@ -22,7 +22,6 @@ aws-cred.txt
 terraform.tfstate
 terraform.tfstat.backup
 *.pem
-*.tfvars
 *.vscode
 .vscode/
 .vscode
