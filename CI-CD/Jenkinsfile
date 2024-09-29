@@ -22,10 +22,12 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                script {
-                    // Run Terraform init
-                    dir('Terraform') {
-                        sh 'terraform init -reconfigure'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-credentials']]) {
+                    script {
+                        dir('Terraform') {
+                            sh 'terraform init -reconfigure'
+                        }
                     }
                 }
             }
@@ -33,10 +35,12 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                script {
-                    // Run Terraform plan
-                    dir('Terraform') {
-                        sh 'terraform plan'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-credentials']]) {
+                    script {
+                        dir('Terraform') {
+                            sh 'terraform plan'
+                        }
                     }
                 }
             }
