@@ -39,6 +39,9 @@ terraform {
 # }
 
 provider "aws" {
-  region  = var.aws_Region
-  profile = "default"
+  region     = getenv("AWS_REGION")
+  access_key = getenv("AWS_ACCESS_KEY_ID")
+  secret_key = getenv("AWS_SECRET_ACCESS_KEY")
 }
+
+
