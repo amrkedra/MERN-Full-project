@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage("Clone the Repo & Go to Terraform Folder") {
+        stage('Clone the Repo & Go to Terraform Folder') {
             steps {
                 script {
                     // Remove the existing directory if it exists
@@ -21,8 +21,7 @@ pipeline {
         
         stage('Terraform Init') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'AWS-Creds']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS-Creds']]) {
                     script {
                         dir('Terraform') {
                             sh 'terraform init -reconfigure'
@@ -34,13 +33,10 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'AWS-Creds']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS-Creds']]) {
                     script {
                         dir('Terraform') {
-                            sh '''
-                                terraform plan -out plan
-                            '''
+                            sh 'terraform plan -out plan'
                         }
                     }
                 }
@@ -49,26 +45,25 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'AWS-Creds']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS-Creds']]) {
                     script {
                         dir('Terraform') {
-                            sh ''' 
-                                terraform apply plan
-                            '''
+                            sh 'terraform apply plan'
                         }
                     }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            script {
-                // Archive Terraform state files
-                archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+            post {
+                always {
+                    stage('Archive Terraform State Files') {
+                        steps {
+                            script {
+                                // Archive Terraform state files
+                                archiveArtifacts artifacts: '**/terraform.tfstate', fingerprint: true
+                            }
+                        }
+                    }
+                }
             }
         }
     }
