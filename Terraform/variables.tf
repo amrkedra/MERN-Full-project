@@ -212,3 +212,8 @@ variable "private_subnet_ids" {
   description = "List of private subnet IDs for the EKS nodes"
   type        = list(string)
 }
+
+variable "node_count" {
+  description = "Number of EKS node group instances"  #instances count for EKS node groups
+  type        = number
+}
