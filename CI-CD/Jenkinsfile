@@ -51,7 +51,7 @@ pipeline {
             steps {
                 
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'aws-creds']]) {
+                                  credentialsId: 'AWS-Creds']]) {
                     script {
                         dir('Terraform') {
                             sh ''' 
