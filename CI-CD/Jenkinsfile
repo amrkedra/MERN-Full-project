@@ -55,7 +55,7 @@ pipeline {
                     script {
                         dir('Terraform') {
                             sh ''' 
-                                terraform apply plan -auto-approve
+                                terraform apply plan
                             '''
                         }
                     }
