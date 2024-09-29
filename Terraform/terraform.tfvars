@@ -6,7 +6,6 @@ env                         = ["development", "staging", "production"]
 subnet_id                   = "subnet-0aada5a074d93f0d3"
 associate_public_ip_address = true
 aws_Region                  = "me-south-1"
-azure_region                = "UAE North"
 names                       = "instance for Terrafrom"
 cidr_block                  = "10.0.0.0/24"
 availability_zone           = "me-south-1a"
