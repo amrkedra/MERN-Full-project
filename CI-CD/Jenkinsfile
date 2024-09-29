@@ -17,7 +17,7 @@ pipeline {
                 }
             }
         }
-
+        }
         
 
         stage('Terraform Init') {
@@ -68,5 +68,4 @@ pipeline {
             }
         }
     }
-}
 }
