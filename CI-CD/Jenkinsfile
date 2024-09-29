@@ -23,7 +23,7 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'aws-credentials']]) {
+                                  credentialsId: 'AWS-Creds']]) {
                     script {
                         dir('Terraform') {
                             sh 'terraform init -reconfigure'
@@ -36,7 +36,7 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'aws-credentials']]) {
+                                  credentialsId: 'AWS-Creds']]) {
                     script {
                         dir('Terraform') {
                             sh 'terraform plan'
