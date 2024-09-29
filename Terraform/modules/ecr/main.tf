@@ -1,7 +1,5 @@
-
-
 resource "aws_ecr_repository" "ecr_repository-1" {
-  name                 = var.repository_name # Reference the variable directly without quotes
+  name                 = var.repository_name
   image_tag_mutability = var.image_tag_mutability
   tags = {
     Environment = var.env[0]
@@ -9,22 +7,23 @@ resource "aws_ecr_repository" "ecr_repository-1" {
   }
 }
 
-
-# Optionally, add a lifecycle policy to the ECR repository
+# Lifecycle policy for the ECR repository
 resource "aws_ecr_lifecycle_policy" "my_ecr_policy" {
-  repository = aws_ecr_repository.ecr_repository-1.name  # Use .name to get the repository name
-  policy     = jsonencode({
+  repository = aws_ecr_repository.ecr_repository-1.name
+
+  # Correctly defined lifecycle policy without the trigger
+  policy = jsonencode({
     rules = [
       {
         rulePriority = 1
-        selection    = {
+        selection = {
           tagStatus = "any"
+          countType = "sinceImagePushed"
+          countUnit = "days"
+          countNumber = 30
         }
-        action       = {
+        action = {
           type = "expire"
-        }
-        trigger      = {
-          daysSinceImagePushed = 30
         }
       }
     ]
