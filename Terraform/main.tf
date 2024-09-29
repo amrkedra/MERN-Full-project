@@ -58,5 +58,6 @@ module "eks" {
   max_size         = var.max_size
   min_size         = var.min_size
   private_subnet_ids = module.vpc.private_subnet_ids
-  node_count       = var.node_count 
-}
+  node_count       = var.node_count
+  env              = var.env
+  }
