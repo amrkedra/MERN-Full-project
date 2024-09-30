@@ -3,10 +3,10 @@ output "vpc_id" {
 }
 
 output "private_subnet_ids" {
-  value = [aws_subnet.private_subnet_a.id, aws_subnet.private_subnet_b.id]
+  value = aws_subnet.private_subnet[*].id
 }
 
-output "public_subnet_id" {
-  value = aws_subnet.public_subnet.id
+output "public_subnet_ids" {
+  description = "Public subnet IDs"
+  value       = aws_subnet.public_subnets[*].id  # Assuming you have resources for public subnets
 }
-

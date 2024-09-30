@@ -61,12 +61,6 @@ variable "instance_count" {
   type = number
 }
 
-variable "instance_type" {
-  type        = string
-  description = "the default type of instances, if not available choose t3.micro"
-
-}
-
 variable "key_name" {
   type        = string
   description = "key-for-terraform"
@@ -83,10 +77,6 @@ variable "associate_public_ip_address" {
   description = "associate_public_ip_address"
 }
 
-variable "names" {
-  description = "names of the instances"
-  type        = string
-}
 
 variable "cidr_block" {
   type        = string
@@ -122,25 +112,22 @@ variable "image_tag_mutability" {
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
-  default     = "10.0.0.0/16"
 }
 
 variable "private_subnet_a_cidr" {
   description = "CIDR block for private subnet A"
   type        = string
-  default     = "10.0.1.0/24"
 }
 
 variable "private_subnet_b_cidr" {
   description = "CIDR block for private subnet B"
   type        = string
-  default     = "10.0.2.0/24"
 }
 
 variable "public_subnet_cidr" {
   description = "CIDR block for public subnet"
   type        = string
-  default     = "10.0.3.0/24"
+  
 }
 
 variable "availability_zone_a" {
@@ -158,10 +145,6 @@ variable "availability_zone_c" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "VPC ID where the security groups will be created"
-  type        = string
-}
 
 variable "cluster_cidr_blocks" {
   description = "CIDR blocks allowed for EKS cluster"
@@ -216,4 +199,36 @@ variable "private_subnet_ids" {
 variable "node_count" {
   description = "Number of EKS node group instances"  #instances count for EKS node groups
   type        = number
+}
+
+variable "role_arn" {
+  type = string
+  description = "the cluster role arn"
+}
+
+variable "vpc_id" {
+  type = string
+  description = "the EKS VPC ID"
+}
+
+
+variable "private_subnets" {
+  type = list(string)
+}
+
+
+variable "instance_type" {
+  type = string
+  description = "the default type of instances, if not available choose t3.micro"
+
+}
+
+variable "jump_server_private_ip" {
+  description = "Private IP address of the jump server"
+  type        = string
+}
+
+variable "public_subnet_ids" {
+  type = string
+  description = "public_subnet_ids of the EKS VPC"
 }

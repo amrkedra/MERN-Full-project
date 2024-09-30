@@ -1,41 +1,59 @@
-# VPC Module
-
 resource "aws_vpc" "eks_vpc" {
-  cidr_block = var.vpc_cidr
+  cidr_block = var.cidr_block
+
+  tags = {
+    Name = "EKS-VPC"
+  }
 }
 
-resource "aws_subnet" "private_subnet_a" {
-  vpc_id            = aws_vpc.eks_vpc.id
-  cidr_block        = var.private_subnet_a_cidr
-  availability_zone = var.availability_zone_a
+resource "aws_subnet" "private_subnet" {
+  count = length(var.private_subnets)  # Assuming var.private_subnets is a list of CIDR blocks
+
+  vpc_id     = aws_vpc.eks_vpc.id
+  cidr_block = var.private_subnets[count.index]
+  map_public_ip_on_launch = false  # No public IP for private subnets
+
+  tags = {
+    Name = "PrivateSubnet-${count.index + 1}"
+  }
+
+  depends_on = [aws_vpc.eks_vpc]  # Ensure VPC is created first
 }
 
-resource "aws_subnet" "private_subnet_b" {
-  vpc_id            = aws_vpc.eks_vpc.id
-  cidr_block        = var.private_subnet_b_cidr
-  availability_zone = var.availability_zone_b
+resource "aws_subnet" "public_subnets" {
+  count = 1
+  vpc_id     = aws_vpc.eks_vpc.id
+  cidr_block = cidrsubnet(var.vpc_cidr, 8, count.index)
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "PublicSubnet-${count.index}"
+  }
+  depends_on = [aws_vpc.eks_vpc]  # Ensure VPC is created first
 }
 
-resource "aws_subnet" "public_subnet" {
-  vpc_id            = aws_vpc.eks_vpc.id
-  cidr_block        = var.public_subnet_cidr
-  availability_zone = var.availability_zone_c
-}
-
-resource "aws_internet_gateway" "igw" {
+# Create an Internet Gateway for public subnet access
+resource "aws_internet_gateway" "eks_ig" {
   vpc_id = aws_vpc.eks_vpc.id
+
+  tags = {
+    Name = "EKS-Internet-Gateway"
+  }
+  depends_on = [aws_vpc.eks_vpc]  # Ensure VPC is created first
 }
 
+# Attach the Internet Gateway to the public subnet route table
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.eks_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = aws_internet_gateway.eks_ig.id
   }
+
+  tags = {
+    Name = "PublicRouteTable"
+  }
+  depends_on = [aws_vpc.eks_vpc]  # Ensure VPC is created first
 }
 
-resource "aws_route_table_association" "public_association" {
-  subnet_id      = aws_subnet.public_subnet.id
-  route_table_id = aws_route_table.public_route_table.id
-}

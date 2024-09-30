@@ -44,6 +44,22 @@ variable "node_count" {
 }
 
 variable "env" {
+  description = "The working environment (e.g., dev, prod)"
   type        = list(string)
-  description = "the working env"
+}
+
+
+variable "role_arn" {
+  description = "The ARN for the cluster IAM role"
+  type        = string
+}
+
+variable "vpc_id" {
+  description = "The VPC ID for EKS"
+  type        = string
+}
+
+variable "jump_server_private_ip" {
+  description = "Private IP address of the jump server"
+  type        = string
 }

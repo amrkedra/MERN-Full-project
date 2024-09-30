@@ -5,12 +5,8 @@ variable "ami" {
 }
 
 variable "subnet_id" {
+  description = "The ID of the subnet to place the jump server in"
   type        = string
-  description = "the default subnet id for aws-bahrain region"
-}
-
-variable "instance_count" {
-  type    = number
 }
 
 variable "instance_type" {
@@ -30,10 +26,6 @@ variable "env" {
   description = "the working env"
 }
 
-variable "names" {
-  description = "names of the instances"
-  type = string
-}
 
 variable "associate_public_ip_address" {
   description = "associate_public_ip_address"
@@ -58,4 +50,16 @@ variable "availability_zone" {
 variable "private_key_path" {
   type = string
   description = "private_key_path"
+}
+
+variable "vpc_id" {
+
+  description = "the VPC ID"
+  type = string
+  
+}
+
+variable "vpc_cidr" {
+  description = "the vpc cidr"
+  type = string
 }
