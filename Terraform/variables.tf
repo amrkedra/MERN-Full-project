@@ -229,6 +229,6 @@ variable "jump_server_private_ip" {
 }
 
 variable "public_subnet_ids" {
-  type = string
+  type = list(string)
   description = "public_subnet_ids of the EKS VPC"
 }

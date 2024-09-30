@@ -4,10 +4,7 @@ variable "ami" {
   nullable    = false
 }
 
-variable "subnet_id" {
-  description = "The ID of the subnet to place the jump server in"
-  type        = string
-}
+
 
 variable "instance_type" {
   type = string
@@ -62,4 +59,9 @@ variable "vpc_id" {
 variable "vpc_cidr" {
   description = "the vpc cidr"
   type = string
+}
+
+variable "public_subnet_ids" {
+  description = "List of public subnet IDs"
+  type        = list(string)
 }

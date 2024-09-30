@@ -23,13 +23,12 @@ resource "aws_security_group" "jump_server_sg" {
   tags = {
     Name = "JumpServerSG"
   }
-  depends_on = [aws_vpc.eks_vpc]  # Ensure VPC is created first
 }
 
 resource "aws_instance" "jump_server" {
   ami           = var.ami
   instance_type = var.instance_type
-  subnet_id     = aws_subnet.public_subnets[0].id  # Use subnet ID passed from the root module
+  subnet_id     = var.public_subnet_ids[0]  # Use subnet ID passed from the root module
 
   # Security Group for SSH
   vpc_security_group_ids = [aws_security_group.jump_server_sg.id]
@@ -37,6 +36,5 @@ resource "aws_instance" "jump_server" {
   tags = {
     Name = "Jump-Server"
   }
-  depends_on = [aws_vpc.eks_vpc]  # Ensure VPC is created first
 }
 

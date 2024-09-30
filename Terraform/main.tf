@@ -65,7 +65,6 @@ module "jump_server" {
   ami             = var.ami             # Specify the AMI ID for the jump server
   instance_type   = var.instance_type         # Instance type for the jump server
   key_name        = var.key_name              # SSH key for accessing the jump server
-  subnet_id       = module.vpc.public_subnet_ids[0] # Use the first private subnet
   vpc_id          = module.vpc.vpc_id   
   associate_public_ip_address = var.associate_public_ip_address
   cidr_block      = var.cidr_block
@@ -74,6 +73,7 @@ module "jump_server" {
   private_key_path = var.private_key_path
   vpc_cidr = var.vpc_cidr  
   env             = var.env 
+  public_subnet_ids = module.vpc.public_subnet_ids
 
 }
 output "jump_server_ip" {
@@ -96,5 +96,5 @@ module "eks" {
   vpc_id             = module.vpc.vpc_id               
   node_count         = var.node_count                        # Number of EKS node group instance
   env                = var.env   
-  jump_server_private_ip     = module.jump_server.jump_server_private_ip                            # Working environment (e.g., dev, prod)
+  jump_server_private_ip     = module.jump_server.jump_server_private_ip
 }

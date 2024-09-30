@@ -7,6 +7,7 @@ resource "aws_eks_cluster" "my_cluster" {
   vpc_config {
     subnet_ids = var.private_subnet_ids  # EKS nodes in private subnets
   }
+  depends_on = [var.vpc_id]
 }
 
 # Security Group for EKS Node Group
