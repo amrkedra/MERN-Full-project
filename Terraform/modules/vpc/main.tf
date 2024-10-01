@@ -1,9 +1,14 @@
-resource "aws_vpc" "eks_vpc" {
+
+  resource "aws_vpc" "eks_vpc" {
   cidr_block = var.cidr_block
 
   tags = {
     Name = "EKS-VPC"
   }
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
 }
 
 resource "aws_subnet" "private_subnet" {
@@ -12,6 +17,7 @@ resource "aws_subnet" "private_subnet" {
   vpc_id     = aws_vpc.eks_vpc.id
   cidr_block = var.private_subnets[count.index]
   map_public_ip_on_launch = false  # No public IP for private subnets
+  availability_zone = element(data.aws_availability_zones.available.names, count.index)  # Use AZs from the data source
 
   tags = {
     Name = "PrivateSubnet-${count.index + 1}"
@@ -19,6 +25,8 @@ resource "aws_subnet" "private_subnet" {
 
   depends_on = [aws_vpc.eks_vpc]  # Ensure VPC is created first
 }
+
+
 
 resource "aws_subnet" "public_subnets" {
   count = 1

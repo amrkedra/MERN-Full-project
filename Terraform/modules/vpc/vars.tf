@@ -18,20 +18,6 @@ variable "public_subnet_cidr" {
   type        = string
 }
 
-variable "availability_zone_a" {
-  description = "Availability zone for private subnet A"
-  type        = string
-}
-
-variable "availability_zone_b" {
-  description = "Availability zone for private subnet B"
-  type        = string
-}
-
-variable "availability_zone_c" {
-  description = "Availability zone for public subnet"
-  type        = string
-}
 
 # Variables for the EKS cluster
 
@@ -59,4 +45,9 @@ variable "cidr_block" {
 variable "private_subnets" {
   description = "The list of private subnet CIDR blocks"
   type        = list(string)
+}
+
+variable "availability_zones" {
+  type = list(string)
+  description = "the availability zone"
 }

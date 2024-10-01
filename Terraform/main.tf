@@ -27,14 +27,11 @@ module "vpc" {
   private_subnet_a_cidr = var.private_subnet_a_cidr          # CIDR block for private subnet A
   private_subnet_b_cidr = var.private_subnet_b_cidr          # CIDR block for private subnet B
   public_subnet_cidr    = var.public_subnet_cidr             # CIDR block for public subnet
-
-  availability_zone_a   = var.availability_zone_a            # Availability zone for private subnet A
-  availability_zone_b   = var.availability_zone_b            # Availability zone for private subnet B
-  availability_zone_c   = var.availability_zone_c            # Availability zone for public subnet
   private_subnet_ids    = var.private_subnet_ids             # List of private subnet IDs for EKS nodes
   vpc_id                = var.vpc_id                         # VPC ID for EKS
   cidr_block            = var.cidr_block                     # The CIDR block for the VPC
-  private_subnets       = var.private_subnets                # List of private subnet CIDR blocks
+  private_subnets       = var.private_subnets  
+  availability_zones    = var.availability_zones             # List of private subnet CIDR blocks
 }
 
 
@@ -69,7 +66,7 @@ module "jump_server" {
   associate_public_ip_address = var.associate_public_ip_address
   cidr_block      = var.cidr_block
   aws_Region      = var.aws_Region
-  availability_zone = var.availability_zone
+  availability_zones = var.availability_zones
   private_key_path = var.private_key_path
   vpc_cidr = var.vpc_cidr  
   env             = var.env 
@@ -82,8 +79,6 @@ output "jump_server_ip" {
 
 module "eks" {
   source             = "./modules/eks"
-  
-  # EKS Cluster Configuration
   cluster_name       = var.cluster_name                      # Name of the EKS cluster
   cluster_role_arn   = var.cluster_role_arn                  # ARN of the IAM role for the EKS cluster
   node_role_arn      = var.node_role_arn                     # ARN of the IAM role for the EKS nodes

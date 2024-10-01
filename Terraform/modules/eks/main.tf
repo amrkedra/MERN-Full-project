@@ -19,10 +19,10 @@ resource "aws_security_group" "eks_node_group_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.jump_server_private_ip]  # Jump server private IP
+    cidr_blocks = ["0.0.0.0/0"]  # Jump server private IP
     description = "Allow SSH from Jump Server"
   }
-
+  
   # Allow all outbound traffic
   egress {
     from_port   = 0
