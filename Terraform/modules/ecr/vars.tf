@@ -1,7 +1,3 @@
-variable "aws_Region" {
-  description = "The AWS region to deploy resources in."
-  type        = string
-}
 
 variable "repository_name" {
   description = "The name of the ECR repository."
@@ -19,3 +15,4 @@ variable "image_tag_mutability" {
   type        = string
 
 }
+

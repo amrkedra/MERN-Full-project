@@ -29,12 +29,9 @@ variable "associate_public_ip_address" {
   type = bool
 }
 
-variable "cidr_block" {
-  type = string
-  description = "the IP V4 CIDR for the VPC"
-}
 
-variable "aws_Region" {
+
+variable "region" {
   type = string
   description = "the region & availability zone"
 }

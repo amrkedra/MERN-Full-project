@@ -41,10 +41,6 @@
 #   sensitive = true
 # }
 
-variable "aws_Region" {
-  type        = string
-  description = "aws_Region"
-}
 
 variable "ami" {
   type        = string
@@ -114,20 +110,24 @@ variable "vpc_cidr" {
   type        = string
 }
 
-variable "private_subnet_a_cidr" {
-  description = "CIDR block for private subnet A"
+variable "public_subnet_cidrs" {
+  description = "List of CIDR blocks for public subnets"
+  type        = list(string)
+}
+
+variable "private_subnet_cidrs" {
+  description = "List of CIDR blocks for private subnets"
+  type        = list(string)
+}
+
+variable "nat_gateway_subnet" {
+  description = "Subnet ID for NAT Gateway"
   type        = string
 }
 
-variable "private_subnet_b_cidr" {
-  description = "CIDR block for private subnet B"
-  type        = string
-}
-
-variable "public_subnet_cidr" {
-  description = "CIDR block for public subnet"
-  type        = string
-  
+variable "tags" {
+  description = "Tags for all resources"
+  type        = map(string)
 }
 
 
@@ -161,20 +161,6 @@ variable "node_group_name" {
   type        = string
 }
 
-variable "desired_size" {
-  description = "Desired size of the EKS node group"
-  type        = number
-}
-
-variable "max_size" {
-  description = "Maximum size of the EKS node group"
-  type        = number
-}
-
-variable "min_size" {
-  description = "Minimum size of the EKS node group"
-  type        = number
-}
 
 variable "private_subnet_ids" {
   description = "List of private subnet IDs for the EKS nodes"
@@ -182,17 +168,17 @@ variable "private_subnet_ids" {
 }
 
 variable "node_count" {
-  description = "Number of EKS node group instances"  #instances count for EKS node groups
+  description = "Number of EKS node group instances" #instances count for EKS node groups
   type        = number
 }
 
 variable "role_arn" {
-  type = string
+  type        = string
   description = "the cluster role arn"
 }
 
 variable "vpc_id" {
-  type = string
+  type        = string
   description = "the EKS VPC ID"
 }
 
@@ -203,7 +189,7 @@ variable "private_subnets" {
 
 
 variable "instance_type" {
-  type = string
+  type        = string
   description = "the default type of instances, if not available choose t3.micro"
 
 }
@@ -213,7 +199,26 @@ variable "jump_server_private_ip" {
   type        = string
 }
 
-variable "public_subnet_ids" {
-  type = list(string)
-  description = "public_subnet_ids of the EKS VPC"
+variable "desired_capacity" {
+  description = "Desired number of EC2 instances in the node group"
+  type        = number
+
 }
+
+variable "max_capacity" {
+  description = "Maximum number of EC2 instances in the node group"
+  type        = number
+
+}
+
+variable "min_capacity" {
+  description = "Minimum number of EC2 instances in the node group"
+  type        = number
+
+}
+variable "region" {
+  description = "The AWS region to deploy the EKS cluster"
+  type        = string
+}
+
+

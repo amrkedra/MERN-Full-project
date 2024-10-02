@@ -22,18 +22,13 @@ locals {
 
 # VPC Module
 module "vpc" {
-  source                = "./modules/vpc"
-  vpc_cidr              = var.vpc_cidr                       # CIDR block for the VPC
-  private_subnet_a_cidr = var.private_subnet_a_cidr          # CIDR block for private subnet A
-  private_subnet_b_cidr = var.private_subnet_b_cidr          # CIDR block for private subnet B
-  public_subnet_cidr    = var.public_subnet_cidr             # CIDR block for public subnet
-  private_subnet_ids    = var.private_subnet_ids             # List of private subnet IDs for EKS nodes
-  vpc_id                = var.vpc_id                         # VPC ID for EKS
-  cidr_block            = var.cidr_block                     # The CIDR block for the VPC
-  private_subnets       = var.private_subnets  
-  availability_zones    = var.availability_zones             # List of private subnet CIDR blocks
+  source               = "./modules/vpc"          # Update this with the actual path to your VPC module
+  vpc_cidr             = var.vpc_cidr             # The VPC CIDR block
+  public_subnet_cidrs  = var.public_subnet_cidrs  # List of CIDR blocks for public subnets
+  private_subnet_cidrs = var.private_subnet_cidrs # List of CIDR blocks for private subnets
+  nat_gateway_subnet   = var.nat_gateway_subnet   # Subnet ID for NAT Gateway
+  tags                 = var.tags                 # Tags for resources
 }
-
 
 
 
@@ -42,7 +37,6 @@ module "ecr" {
   source               = "./modules/ecr"
   repository_name      = var.repository_name
   image_tag_mutability = var.image_tag_mutability
-  aws_Region           = var.aws_Region
   env                  = var.env
 
 }
@@ -57,39 +51,76 @@ module "ecr" {
 
 # EKS Module
 
-module "jump_server" {
-  source = "./modules/jump_server"  # Ensure the source path is correct
-  ami             = var.ami             # Specify the AMI ID for the jump server
-  instance_type   = var.instance_type         # Instance type for the jump server
-  key_name        = var.key_name              # SSH key for accessing the jump server
-  vpc_id          = module.vpc.vpc_id   
+module "Jenkins-Jump-Servers" {
+  source                      = "./modules/Jenkins-Jump-Servers" # Ensure the source path is correct
+  ami                         = var.ami                          # Specify the AMI ID for the jump server
+  instance_type               = var.instance_type                # Instance type for the jump server
+  key_name                    = var.key_name                     # SSH key for accessing the jump server
+  vpc_id                      = module.vpc.vpc_id
   associate_public_ip_address = var.associate_public_ip_address
-  cidr_block      = var.cidr_block
-  aws_Region      = var.aws_Region
-  availability_zones = var.availability_zones
-  private_key_path = var.private_key_path
-  vpc_cidr = var.vpc_cidr  
-  env             = var.env 
-  public_subnet_ids = module.vpc.public_subnet_ids
+  region                      = var.region
+  availability_zones          = var.availability_zones
+  private_key_path            = var.private_key_path
+  vpc_cidr                    = var.vpc_cidr
+  env                         = var.env
+  public_subnet_ids           = module.vpc.public_subnet_ids
+  
 
 }
 output "jump_server_ip" {
-  value = module.jump_server.jump_server_ip  # Access the jump server IP from the module output
+  value = module.Jenkins-Jump-Servers.jump_server_ip # Access the jump server IP from the module output
 }
 
 module "eks" {
-  source             = "./modules/eks"
-  cluster_name       = var.cluster_name                      # Name of the EKS cluster
-  cluster_role_arn   = var.cluster_role_arn                  # ARN of the IAM role for the EKS cluster
-  node_role_arn      = var.node_role_arn                     # ARN of the IAM role for the EKS nodes
-  node_group_name    = var.node_group_name                   # Name of the EKS node group
-  desired_size       = var.desired_size                      # Desired size of the EKS node group
-  max_size           = var.max_size                          # Maximum size of the EKS node group
-  min_size           = var.min_size                          # Minimum size of the EKS node group
-  role_arn           = var.cluster_role_arn 
-  private_subnet_ids = module.vpc.private_subnet_ids          # List of private subnet IDs from the VPC module
-  vpc_id             = module.vpc.vpc_id               
-  node_count         = var.node_count                        # Number of EKS node group instance
-  env                = var.env   
-  jump_server_private_ip     = module.jump_server.jump_server_private_ip
+  source             = "./modules/eks" # Path to your EKS module
+  vpc_id             = module.vpc.vpc_id
+  public_subnet_ids  = module.vpc.public_subnet_ids
+  private_subnet_ids = module.vpc.private_subnet_ids
+  node_group_name    = "my-node-group" # Replace with your desired node group name
+  # Required attributes
+  desired_capacity       = 2                                 # Number of desired nodes
+  max_capacity           = 5                                 # Maximum number of nodes
+  min_capacity           = 1                                 # Minimum number of nodes
+  
+
+  region       = var.region     # Specify the region for the EKS cluster
+  cluster_name = var.cluster_name # Specify the name for the EKS cluster
 }
+
+
+output "eks_cluster_name" {
+  value = module.eks.cluster_name
+}
+
+output "eks_cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}
+
+output "eks_cluster_arn" {
+  value = module.eks.cluster_arn
+}
+
+output "eks_node_group_name" {
+  value = module.eks.node_group_name
+}
+
+output "eks_node_group_arn" {
+  value = module.eks.node_group_arn
+}
+
+output "eks_node_group_id" {
+  value = module.eks.node_group_id
+}
+
+output "vpc_id" {
+  value = module.vpc.vpc_id
+}
+
+output "public_subnet_ids" {
+  value = module.vpc.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  value = module.vpc.private_subnet_ids
+}
+

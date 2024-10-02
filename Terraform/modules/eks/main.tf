@@ -1,105 +1,116 @@
-# EKS Cluster Module
-resource "aws_eks_cluster" "my_cluster" {
-  name     = var.cluster_name
-  role_arn = var.cluster_role_arn
+# Create IAM role for EKS Cluster
+resource "aws_iam_role" "eks_cluster_role" {
+  name = "eks-cluster-role"
 
-  vpc_config {
-    subnet_ids = var.private_subnet_ids  # EKS nodes in private subnets
-  }
-  depends_on = [var.vpc_id]
-}
-
-# Security Group for EKS Node Group
-resource "aws_security_group" "eks_node_group_sg" {
-  vpc_id = var.vpc_id  # Correct VPC ID reference from the module output
-
-  ingress = [
-    for port in [22, 10255, 443, 10250] : {
-      description      = "TLS from VPC"
-      from_port        = port
-      to_port          = port
-      protocol         = "tcp"
-      ipv6_cidr_blocks = ["::/0"]
-      self             = false
-      prefix_list_ids  = []
-      security_groups  = []
-      cidr_blocks      = ["0.0.0.0/0"]
-    }
-  ]
-
-  # Allow all outbound traffic
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+      },
+    ]
+  })
 
   tags = {
-    Name = "EKSNodeGroupSG"
+    Name = "EKS-Cluster-Role"
   }
 }
 
-# IAM Role for EKS Worker Nodes
-resource "aws_iam_role" "eks_worker_role" {
-  name               = "eks_worker_role"
-  assume_role_policy = data.aws_iam_policy_document.eks_worker_assume_role_policy.json
+# Attach necessary policies to the EKS Cluster role
+resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.eks_cluster_role.name
 }
 
-# Assume Role Policy Document for Worker Role
-data "aws_iam_policy_document" "eks_worker_assume_role_policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
+resource "aws_iam_role_policy_attachment" "eks_vpc_resource_attachment" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+  role       = aws_iam_role.eks_cluster_role.name
+}
 
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
+# Create EKS Cluster
+resource "aws_eks_cluster" "my_eks_cluster" {
+  name     = "my-eks-cluster"
+  role_arn = aws_iam_role.eks_cluster_role.arn
+
+  vpc_config {
+    subnet_ids = var.private_subnet_ids  # Use only private subnet IDs for worker nodes
+
+    endpoint_private_access = true
+    endpoint_public_access  = false  # Disable public access to the endpoint
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_cluster_policy,
+    aws_iam_role_policy_attachment.eks_vpc_resource_attachment,
+    var.vpc_id, 
+    
+  ]
+
+  tags = {
+    Name = "MyEKSCluster"
+  }
+    # Ensure VPC and security group are created first
+ 
+}
+
+# Create IAM role for EKS Node Group
+resource "aws_iam_role" "eks_node_group_role" {
+  name = "eks-node-group-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+
+  tags = {
+    Name = "EKS-Node-Group-Role"
   }
 }
 
-# Attach the required IAM policies to the worker role
-resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
+# Attach necessary policies to the EKS Node Group role
+resource "aws_iam_role_policy_attachment" "eks_worker_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.eks_worker_role.name
+  role       = aws_iam_role.eks_node_group_role.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.eks_worker_role.name
+  role       = aws_iam_role.eks_node_group_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_registry_read_only" {
+resource "aws_iam_role_policy_attachment" "eks_registry_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.eks_worker_role.name
+  role       = aws_iam_role.eks_node_group_role.name
 }
 
-# EKS Node Group
+# Create EKS Node Group
 resource "aws_eks_node_group" "my_node_group" {
-  cluster_name    = aws_eks_cluster.my_cluster.name
+  cluster_name    = aws_eks_cluster.my_eks_cluster.name
   node_group_name = var.node_group_name
-  node_role_arn   = aws_iam_role.eks_worker_role.arn  # Reference to the newly created IAM role
-  subnet_ids      = var.private_subnet_ids
+  node_role_arn   = aws_iam_role.eks_node_group_role.arn
+  subnet_ids      = var.private_subnet_ids  # Ensure only private subnets are used for worker nodes
 
   scaling_config {
-    desired_size = var.desired_size
-    max_size     = var.max_size
-    min_size     = var.min_size
+    desired_size = var.desired_capacity
+    max_size     = var.max_capacity
+    min_size     = var.min_capacity
   }
 
-  # Attach the security group to the node group
-  depends_on = [aws_security_group.eks_node_group_sg]
+  depends_on = [aws_eks_cluster.my_eks_cluster]
 
-  # Define tags dynamically for the node group
   tags = {
-    Name        = "EKS-Node-${count.index + 1}"
-    Environment = var.env[0]
-    Project     = "MyProject"
+    Name = "MyEKSNodeGroup"
   }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  count = var.node_count
 }

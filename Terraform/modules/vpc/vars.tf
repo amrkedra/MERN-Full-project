@@ -1,53 +1,26 @@
+
+# VPC Variables
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
 }
 
-variable "private_subnet_a_cidr" {
-  description = "CIDR block for private subnet A"
-  type        = string
-}
-
-variable "private_subnet_b_cidr" {
-  description = "CIDR block for private subnet B"
-  type        = string
-}
-
-variable "public_subnet_cidr" {
-  description = "CIDR block for public subnet"
-  type        = string
-}
-
-
-# Variables for the EKS cluster
-
-
-variable "private_subnet_ids" {
-  description = "List of private subnet IDs for the EKS nodes"
+variable "public_subnet_cidrs" {
+  description = "List of CIDR blocks for public subnets"
   type        = list(string)
 }
 
-
-
-variable "vpc_id" {
-  description = "The VPC ID for EKS"
-  type        = string
-}
-
-
-
-# VPC Variables
-variable "cidr_block" {
-  description = "The CIDR block for the VPC"
-  type        = string
-}
-
-variable "private_subnets" {
-  description = "The list of private subnet CIDR blocks"
+variable "private_subnet_cidrs" {
+  description = "List of CIDR blocks for private subnets"
   type        = list(string)
 }
 
-variable "availability_zones" {
-  type = list(string)
-  description = "the availability zone"
+variable "nat_gateway_subnet" {
+  description = "Subnet ID for NAT Gateway"
+  type        = string
+}
+
+variable "tags" {
+  description = "Tags for all resources"
+  type        = map(string)
 }
