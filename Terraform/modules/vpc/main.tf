@@ -98,30 +98,3 @@ resource "aws_route_table_association" "private_assoc" {
   subnet_id      = aws_subnet.private_subnet[count.index].id
   route_table_id = aws_route_table.private.id
 }
-
-
-# Security Group for EKS Worker Nodes
-resource "aws_security_group" "eks_worker_sg" {
-  vpc_id      = aws_vpc.mern_app_vpc.id
-  description = "Security Group for EKS Worker Nodes"
-
-  # Allow EKS control plane traffic (default control plane communication)
-  ingress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Egress: Allow nodes to connect via the NAT Gateway for external communication if necessary
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "EKSWorkerNodesSG"
-  }
-}

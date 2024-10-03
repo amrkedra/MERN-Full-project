@@ -1,3 +1,39 @@
+resource "aws_security_group" "MERN-Cluster-SG" {
+  vpc_id      = var.vpc_id
+  description = "Security Group for EKS Worker Nodes"
+
+  # Allow EKS control plane traffic (default control plane communication)
+  ingress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow ICMP (Ping) traffic
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]  # You can restrict this to the CIDR of the Jump server if needed
+  }
+
+  # Egress: Allow nodes to connect via the NAT Gateway for external communication if necessary
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "MERN-Cluster-SG"
+  }
+}
+
+
+
+
 # Create IAM role for EKS Cluster
 resource "aws_iam_role" "eks_cluster_role" {
   name = "eks-cluster-role"
@@ -33,28 +69,25 @@ resource "aws_iam_role_policy_attachment" "eks_vpc_resource_attachment" {
 
 # Create EKS Cluster
 resource "aws_eks_cluster" "my_eks_cluster" {
-  name     = "my-eks-cluster"
+  name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
-    subnet_ids = var.private_subnet_ids  # Use only private subnet IDs for worker nodes
+    subnet_ids = var.private_subnet_ids
+    security_group_ids  = [aws_security_group.MERN-Cluster-SG.id]
 
     endpoint_private_access = true
-    endpoint_public_access  = false  # Disable public access to the endpoint
+    endpoint_public_access  = false
   }
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy,
     aws_iam_role_policy_attachment.eks_vpc_resource_attachment,
-    var.vpc_id, 
-    
   ]
 
   tags = {
     Name = "MyEKSCluster"
   }
-    # Ensure VPC and security group are created first
- 
 }
 
 # Create IAM role for EKS Node Group

@@ -208,14 +208,13 @@ variable "desired_capacity" {
 variable "max_capacity" {
   description = "Maximum number of EC2 instances in the node group"
   type        = number
-
 }
 
 variable "min_capacity" {
   description = "Minimum number of EC2 instances in the node group"
   type        = number
-
 }
+
 variable "region" {
   description = "The AWS region to deploy the EKS cluster"
   type        = string

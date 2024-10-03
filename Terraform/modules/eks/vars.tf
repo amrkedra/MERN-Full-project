@@ -47,3 +47,9 @@ variable "public_subnet_ids" {
   description = "A list of public subnet IDs for the EKS worker nodes"
   type        = list(string)
 }
+variable "cidr_block" {
+  type = string
+  description = "the VPC CIDR Block"
+}
+
+

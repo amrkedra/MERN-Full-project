@@ -77,14 +77,12 @@ module "eks" {
   public_subnet_ids  = module.vpc.public_subnet_ids
   private_subnet_ids = module.vpc.private_subnet_ids
   node_group_name    = "my-node-group" # Replace with your desired node group name
-  # Required attributes
-  desired_capacity       = 2                                 # Number of desired nodes
-  max_capacity           = 5                                 # Maximum number of nodes
-  min_capacity           = 1                                 # Minimum number of nodes
-  
-
-  region       = var.region     # Specify the region for the EKS cluster
-  cluster_name = var.cluster_name # Specify the name for the EKS cluster
+  desired_capacity   = var.desired_capacity                                 # Number of desired nodes
+  max_capacity       = var.max_capacity                                 # Maximum number of nodes
+  min_capacity       = var.min_capacity                                 # Minimum number of nodes
+  region             = var.region     # Specify the region for the EKS cluster
+  cluster_name       = var.cluster_name # Specify the name for the EKS cluster
+  cidr_block         = var.vpc_cidr
 }
 
 
@@ -123,4 +121,5 @@ output "public_subnet_ids" {
 output "private_subnet_ids" {
   value = module.vpc.private_subnet_ids
 }
+
 
