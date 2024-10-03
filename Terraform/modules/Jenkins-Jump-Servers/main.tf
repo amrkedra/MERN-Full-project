@@ -8,32 +8,50 @@ resource "aws_security_group" "mern_security_group" {
   vpc_id      = var.vpc_id  # Ensure you have the VPC defined in your module
   description = "Allowing Jenkins, Sonarqube, SSH Access"
 
-  ingress = [
-    for port in [22, 8080, 9000, 9090, 80, 443] : {
-      description      = "Allow port ${port}"
-      from_port        = port
-      to_port          = port
-      protocol         = "tcp"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = ["::/0"]
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    }
-  ]
+  ingress = concat(
+    [
+      for port in [22, 8080, 9000, 9090, 80, 443] : {
+        description      = "Allow port ${port}"
+        from_port        = port
+        to_port          = port
+        protocol         = "tcp"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+        prefix_list_ids  = []
+        security_groups  = []
+        self             = false
+      }
+    ],
+    [
+      {
+        description      = "Allow ICMP"
+        from_port        = -1
+        to_port          = -1
+        protocol         = "icmp"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+        prefix_list_ids  = []
+        security_groups  = []
+        self             = false
+      }
+    ]
+  )
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
 
   tags = {
     Name = "mern-security-group"
   }
-  # Ensure the VPC is created first
 }
+
+
+
 
 # Create Jump Server
 resource "aws_instance" "jump_server" {
