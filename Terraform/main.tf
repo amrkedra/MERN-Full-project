@@ -64,11 +64,16 @@ module "Jenkins-Jump-Servers" {
   vpc_cidr                    = var.vpc_cidr
   env                         = var.env
   public_subnet_ids           = module.vpc.public_subnet_ids
-  
-
 }
+
 output "jump_server_ip" {
-  value = module.Jenkins-Jump-Servers.jump_server_ip # Access the jump server IP from the module output
+  value       = module.Jenkins-Jump-Servers.jump_server_ip # Access the public IP from the module output
+  description = "The public IP address of the jump server"
+}
+
+output "jump_server_private_ip" {
+  value       = module.Jenkins-Jump-Servers.jump_server_private_ip  # Access the private IP from the module output
+  description = "The private IP address of the jump server"
 }
 
 module "eks" {
@@ -83,6 +88,7 @@ module "eks" {
   region             = var.region     # Specify the region for the EKS cluster
   cluster_name       = var.cluster_name # Specify the name for the EKS cluster
   cidr_block         = var.vpc_cidr
+  jump_server_private_ip = module.Jenkins-Jump-Servers.jump_server_private_ip
 }
 
 

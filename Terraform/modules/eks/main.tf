@@ -7,7 +7,7 @@ resource "aws_security_group" "MERN-Cluster-SG" {
     from_port   = 0
     to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${var.jump_server_private_ip}/32"]
   }
 
   # Allow ICMP (Ping) traffic
@@ -15,7 +15,7 @@ resource "aws_security_group" "MERN-Cluster-SG" {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]  # You can restrict this to the CIDR of the Jump server if needed
+    cidr_blocks = ["${var.jump_server_private_ip}/32"]  # You can restrict this to the CIDR of the Jump server if needed
   }
 
   # Egress: Allow nodes to connect via the NAT Gateway for external communication if necessary
@@ -30,8 +30,6 @@ resource "aws_security_group" "MERN-Cluster-SG" {
     Name = "MERN-Cluster-SG"
   }
 }
-
-
 
 
 # Create IAM role for EKS Cluster

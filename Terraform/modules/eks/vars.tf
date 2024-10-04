@@ -52,4 +52,8 @@ variable "cidr_block" {
   description = "the VPC CIDR Block"
 }
 
+variable "jump_server_private_ip" {
+  description = "Jump server private IP to access the cluster from it only"
+  type = string
+}
 
