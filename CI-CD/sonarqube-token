@@ -1,0 +1,28 @@
+squ_9afe5ef86fe6b78e1756aa26064b9372593b7e93
+
+frontend sonarqube scanner
+
+sonar-scanner \
+  -Dsonar.projectKey=frontend \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=http://15.185.210.43:9000 \
+  -Dsonar.login=squ_9afe5ef86fe6b78e1756aa26064b9372593b7e93
+
+
+
+backend sonarqube scanner
+  sonar-scanner \
+  -Dsonar.projectKey=backend \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=http://15.185.210.43:9000 \
+  -Dsonar.login=squ_9afe5ef86fe6b78e1756aa26064b9372593b7e93
+
+
+  aws ecr get-login-password --region me-south-1 | docker login --username AWS --password-stdin 729207654069.dkr.ecr.me-south-1.amazonaws.com
+
+
+kubectl create secret docker-registry image-pull-secret-repo-1 \
+--docker-server=729207654069.dkr.ecr.me-south-1.amazonaws.com \
+--docker-username=AWS \
+--docker-password=$(aws ecr get-login-password --region me-south-1) \
+--docker-email=amrkedra.1993@gmail.com
