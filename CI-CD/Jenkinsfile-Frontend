@@ -19,9 +19,10 @@ pipeline {
         }
         stage('Checkout from Git') {
             steps {
-                git credentialsId: 'GIHUB-Creds', url: 'https://github.com/amrkedra/MERN-Full-project.git'
+                git branch: 'main', credentialsId: 'GIHUB-Creds', url: 'https://github.com/amrkedra/MERN-Full-project.git'
             }
         }
+
         stage('Sonarqube Analysis') {
             steps {
                 dir('App-Code/frontend') {
