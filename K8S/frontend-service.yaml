@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Service
-metadata: 
+metadata:
   name: frontend
-  namespace: three-tier
+  namespace: default
 spec:
   ports:
   - port: 3000
