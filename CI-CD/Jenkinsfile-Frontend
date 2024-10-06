@@ -24,7 +24,7 @@ pipeline {
         }
         stage('Sonarqube Analysis') {
             steps {
-                dir('Application-Code/frontend') {
+                dir('App-Code/frontend') {
                     withSonarQubeEnv('sonar-server') {
                         sh ''' $SCANNER_HOME/bin/sonar-scanner \
                         -Dsonar.projectName=frontend \
@@ -42,7 +42,7 @@ pipeline {
         }
         stage('OWASP Dependency-Check Scan') {
             steps {
-                dir('Application-Code/frontend') {
+                dir('App-Code/frontend') {
                     dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
                     dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
@@ -50,7 +50,7 @@ pipeline {
         }
         stage('Trivy File Scan') {
             steps {
-                dir('Application-Code/frontend') {
+                dir('App-Code/frontend') {
                     sh 'trivy fs . > trivyfs.txt'
                 }
             }
@@ -58,7 +58,7 @@ pipeline {
         stage("Docker Image Build") {
             steps {
                 script {
-                    dir('Application-Code/frontend') {
+                    dir('App-Code/frontend') {
                             sh 'docker system prune -f'
                             sh 'docker container prune -f'
                             sh 'docker build -t ${AWS_ECR_REPO_NAME} .'
@@ -82,26 +82,26 @@ pipeline {
         }
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'GITHUB', url: 'https://github.com/AmanPathak-DevOps/End-to-End-Kubernetes-Three-Tier-DevSecOps-Project.git'
+                git credentialsId: 'GIHUB-Creds', url: 'https://github.com/amrkedra/MERN-Full-project.git'
             }
         }
         stage('Update Deployment file') {
             environment {
-                GIT_REPO_NAME = "End-to-End-Kubernetes-Three-Tier-DevSecOps-Project"
-                GIT_USER_NAME = "AmanPathak-DevOps"
+                GIT_REPO_NAME = "MERN-Full-project"
+                GIT_USER_NAME = "amrkedra"
             }
             steps {
-                dir('Kubernetes-Manifests-file/Frontend') {
-                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                dir('k8s') {
+                    withCredentials([string(credentialsId: 'GIHUB-Creds', variable: 'GITHUB_TOKEN')]) {
                         sh '''
-                            git config user.email "aman07pathak@gmail.com"
-                            git config user.name "AmanPathak-DevOps"
+                            git config user.email "amrkedra.1993@gmail.com"
+                            git config user.name "amrkedra"
                             BUILD_NUMBER=${BUILD_NUMBER}
                             echo $BUILD_NUMBER
                             imageTag=$(grep -oP '(?<=frontend:)[^ ]+' deployment.yaml)
                             echo $imageTag
-                            sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" deployment.yaml
-                            git add deployment.yaml
+                            sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" frontend-deployment.yaml
+                            git add frontend-deployment.yaml
                             git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
                             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:master
                         '''
