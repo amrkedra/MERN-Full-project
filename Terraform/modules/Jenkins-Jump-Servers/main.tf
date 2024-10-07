@@ -80,7 +80,13 @@ resource "aws_instance" "jenkins_server" {
   vpc_security_group_ids = [aws_security_group.mern_security_group.id]  # Use the created security group
   key_name              = var.key_name  # Key pair for SSH access
 
-  availability_zone     = random_shuffle.az_selection.result[0]  # Randomly selected availability zone
+  availability_zone     = random_shuffle.az_selection.result[0]
+  
+  root_block_device {
+    volume_size           = 50  # Set disk size to 100 GB
+    volume_type           = "gp3"  # Use general-purpose SSD (gp3)
+    delete_on_termination = true  # Automatically delete the volume when the instance is terminated
+  }  
 
   tags = {
     Name = "Jenkins Server"
