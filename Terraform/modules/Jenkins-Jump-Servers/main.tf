@@ -75,7 +75,7 @@ resource "aws_instance" "jump_server" {
 # Create Jenkins Server
 resource "aws_instance" "jenkins_server" {
   ami                    = var.ami  # AMI ID for the Jenkins server
-  instance_type         = var.instance_type  # Instance type for the Jenkins server
+  instance_type         = "t3.large"  # Instance type for the Jenkins server
   subnet_id             = var.public_subnet_ids[0]  # Public subnet for the Jenkins server
   vpc_security_group_ids = [aws_security_group.mern_security_group.id]  # Use the created security group
   key_name              = var.key_name  # Key pair for SSH access
