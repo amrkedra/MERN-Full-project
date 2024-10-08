@@ -31,3 +31,8 @@ MERN-Full-project.git/*
 MERN-Full-project.git/
 /MERN-Full-project.git/*
 /MERN-Full-project.git
+App-Code/frontend/.scannerwork/
+App-Code/frontend/dependency-check-report.xml
+App-Code/frontend/trivyfs.txt
+K8S@tmp/
+trivyimage.txt
