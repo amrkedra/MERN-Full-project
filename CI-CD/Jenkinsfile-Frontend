@@ -91,19 +91,20 @@ pipeline {
             }
         }
 
-        stage('Update Image Tag') {
+stage('Update Image Tag') {
     steps {
         script {
             // Set Git user configuration (if not done in global Jenkins settings)
-            git config user.email "${env.GIT_USER_EMAIL}"
-            git config user.name "${env.GIT_USER_NAME}"
+            sh "git config user.email '${env.GIT_USER_EMAIL}'"
+            sh "git config user.name '${env.GIT_USER_NAME}'"
 
             // Retrieve the current image tag from frontend-deployment.yaml
             def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' frontend-deployment.yaml", returnStdout: true).trim()
             echo "Current image tag: ${imageTag}"
 
-            // Set the new image tag using the BUILD_NUMBER
-            def newImageTag = "${imageTag%:*}:${env.BUILD_NUMBER}"
+            // Extract the base image name (without the tag) and create the new image tag
+            def baseImage = imageTag.tokenize(':')[0]  // Get everything before the ':'
+            def newImageTag = "${baseImage}:${env.BUILD_NUMBER}"  // Create new image tag
             echo "New image tag: ${newImageTag}"
 
             // Update the image tag in frontend-deployment.yaml
