@@ -3,10 +3,10 @@ pipeline {
     tools {
         jdk 'jdk'
         nodejs 'NodeJS'
-        // Ensure 'SonarQube Scanner' is configured in Global Tool Configuration
+        // 'SonarQube Scanner' should be configured in Global Tool Configuration
     }
     environment  {
-        SCANNER_HOME = tool 'SonarQube Scanner'
+        SCANNER_HOME = tool 'SonarQube Scanner' // Ensure this matches the tool name in Global Tool Configuration
         AWS_ACCOUNT_ID = credentials('AWS-Account-ID')
         AWS_ECR_REPO_NAME = credentials('ecr-repo-1')
         AWS_DEFAULT_REGION = 'me-south-1'
@@ -42,8 +42,9 @@ pipeline {
             }
         }
 
-        stage('Verify report-task.txt') { // Temporary Stage for Verification
+        stage('Verify Scanner Home') { // Temporary Stage for Verification
             steps {
+                echo "SonarQube Scanner Home Directory: ${SCANNER_HOME}"
                 dir('App-Code/frontend') {
                     sh 'ls -la report-task.txt || echo "report-task.txt not found"'
                 }
@@ -53,7 +54,7 @@ pipeline {
         stage('Quality Check') {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false // Removed 'timeout' parameter
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
                 }
             }
         }
