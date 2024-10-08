@@ -92,41 +92,39 @@ pipeline {
         }
 
         stage('Update Image Tag') {
-            steps {
-                script {
-                    BUILD_NUMBER = "${env.BUILD_NUMBER}"
-                    echo "Build number: ${BUILD_NUMBER}"
+    steps {
+        script {
+            // Set Git user configuration (if not done in global Jenkins settings)
+            git config user.email "${env.GIT_USER_EMAIL}"
+            git config user.name "${env.GIT_USER_NAME}"
 
-                    // Display current contents of frontend-deployment.yaml
-                    echo "Current frontend-deployment.yaml:"
-                    sh 'cat frontend-deployment.yaml'
+            // Retrieve the current image tag from frontend-deployment.yaml
+            def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' frontend-deployment.yaml", returnStdout: true).trim()
+            echo "Current image tag: ${imageTag}"
 
-                    // Fetch the current image tag
-                    def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' frontend-deployment.yaml", returnStdout: true).trim()
-                    echo "Current image tag: ${imageTag}"
+            // Set the new image tag using the BUILD_NUMBER
+            def newImageTag = "${imageTag%:*}:${env.BUILD_NUMBER}"
+            echo "New image tag: ${newImageTag}"
 
-                    // Only proceed if the current tag is 'latest'
-                    if (imageTag == "latest") {
-                        // Update the image tag in frontend-deployment.yaml
-                        sh "sed -i 's|${imageTag}|${imageTag%:*}:${BUILD_NUMBER}|g' frontend-deployment.yaml"
+            // Update the image tag in frontend-deployment.yaml
+            echo "Updating image tag in frontend-deployment.yaml"
+            sh """
+                sed -i 's|${imageTag}|${newImageTag}|g' frontend-deployment.yaml
+            """
 
-                        // Display the updated line
-                        echo "Updated image line:"
-                        sh "grep image: frontend-deployment.yaml"
-                    } else {
-                        echo "No update needed, current image tag is not 'latest'."
-                    }
+            // Verify the changes made to the frontend-deployment.yaml file
+            echo "Changes made to frontend-deployment.yaml:"
+            sh "cat frontend-deployment.yaml"
 
-                    // Git operations
-                    sh '''
-                        git config user.email "${GIT_EMAIL}"
-                        git config user.name "${GIT_USERNAME}"
-                        git add frontend-deployment.yaml
-                        git commit -m "Update deployment Image to version ${BUILD_NUMBER}" || echo "No changes to commit"
-                        git push https://****@github.com/amrkedra/MERN-Full-project HEAD:main
-                    '''
-                }
-            }
+            // Add changes to git, commit, and push
+            sh """
+                git add frontend-deployment.yaml
+                git commit -m "Update deployment Image to version ${env.BUILD_NUMBER}"
+                git push https://****@github.com/amrkedra/MERN-Full-project HEAD:main
+            """
         }
+    }
+}
+
     }
 }
