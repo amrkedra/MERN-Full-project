@@ -106,27 +106,37 @@ pipeline {
                             BUILD_NUMBER=${BUILD_NUMBER}
                             echo "Build number: ${BUILD_NUMBER}"
                             
-                            
+
                             imageTag=$(grep -oP '(?<=frontend:)[^ ]+' frontend-deployment.yaml)
                             echo "Current image tag: $imageTag"
                             
-                            
+
                             if [ -z "$imageTag" ]; then
                                 echo "Error: Image tag not found in frontend-deployment.yaml"
                                 exit 1
                             fi
-
-                            sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" frontend-deployment.yaml
-
-                            echo "Changes made to frontend-deployment.yaml:"
-                            cat frontend-deployment.yaml
                             
+                            
+                            echo "Current image line:"
+                            grep 'image:' frontend-deployment.yaml
+                            
+
+                            sed -i "s|${AWS_ECR_REPO_NAME}:${imageTag}|${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}|g" frontend-deployment.yaml
+                            
+
+                            echo "Updated image line:"
+                            grep 'image:' frontend-deployment.yaml
+                            
+
                             git add frontend-deployment.yaml
                             
+
                             git commit -m "Update deployment Image to version ${BUILD_NUMBER}" || echo "No changes to commit"
                             
+
                             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                         '''
+
                     }
                 }
             }
