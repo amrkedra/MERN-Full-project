@@ -94,7 +94,7 @@ pipeline {
         stage('Update Image Tag') {
             steps {
                 script {
-                    BUILD_NUMBER=${BUILD_NUMBER}
+                    BUILD_NUMBER = "${env.BUILD_NUMBER}"
                     echo "Build number: ${BUILD_NUMBER}"
 
                     // Display current contents of frontend-deployment.yaml
@@ -119,9 +119,11 @@ pipeline {
 
                     // Git operations
                     sh '''
+                        git config user.email "${GIT_EMAIL}"
+                        git config user.name "${GIT_USERNAME}"
                         git add frontend-deployment.yaml
                         git commit -m "Update deployment Image to version ${BUILD_NUMBER}" || echo "No changes to commit"
-                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                        git push https://****@github.com/amrkedra/MERN-Full-project HEAD:main
                     '''
                 }
             }
