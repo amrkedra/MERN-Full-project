@@ -1,4 +1,4 @@
-squ_9afe5ef86fe6b78e1756aa26064b9372593b7e93
+sqp_8d5e40f604e508c4d8539757a1b9676b83d49697
 
 frontend sonarqube scanner
 
@@ -6,19 +6,18 @@ sonar-scanner \
   -Dsonar.projectKey=frontend \
   -Dsonar.sources=. \
   -Dsonar.host.url=http://15.185.210.43:9000 \
-  -Dsonar.login=squ_9afe5ef86fe6b78e1756aa26064b9372593b7e93
+  -Dsonar.token=sqp_8d5e40f604e508c4d8539757a1b9676b83d49697
 
 
 
-backend sonarqube scanner
   sonar-scanner \
   -Dsonar.projectKey=backend \
   -Dsonar.sources=. \
   -Dsonar.host.url=http://15.185.210.43:9000 \
-  -Dsonar.login=squ_9afe5ef86fe6b78e1756aa26064b9372593b7e93
+  -Dsonar.token=sqp_d85b74c5835cf3f1e84444de81c6bb61446f4814
 
 
-  aws ecr get-login-password --region me-south-1 | docker login --username AWS --password-stdin 729207654069.dkr.ecr.me-south-1.amazonaws.com
+aws ecr get-login-password --region me-south-1 | docker login --username AWS --password-stdin 729207654069.dkr.ecr.me-south-1.amazonaws.com
 
 
 kubectl create secret docker-registry image-pull-secret-repo-1 \
