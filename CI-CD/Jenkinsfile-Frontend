@@ -92,6 +92,10 @@ pipeline {
         }
 
         stage('Update Image Tag') {
+            environment {
+                GIT_REPO_NAME = "amrkedra.1993@gmail.com"
+                GIT_USER_NAME = "amrkedra"
+            }
             steps {
                 script {
                     // Use withCredentials to access the GitHub token
