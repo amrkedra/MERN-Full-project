@@ -100,49 +100,13 @@ pipeline {
                 dir('K8S') {
                     withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')]) {
                         sh '''
- 
-                            git config user.email "amrkedra.1993@gmail.com"
-                            git config user.name "amrkedra"
-                            
-
                             BUILD_NUMBER=${BUILD_NUMBER}
-                            echo "Build number: ${BUILD_NUMBER}"
-                            
-
-                            echo "==== Contents of frontend-deployment.yaml BEFORE changes ===="
-                            cat frontend-deployment.yaml
-                            
-
+                            echo $BUILD_NUMBER
                             imageTag=$(grep -oP '(?<=frontend:)[^ ]+' frontend-deployment.yaml)
-                            echo "Extracted image tag: $imageTag"
-                            
-
-                            echo "AWS_ECR_REPO_NAME: ${AWS_ECR_REPO_NAME}"
-                            echo "BUILD_NUMBER: ${BUILD_NUMBER}"
-                            
-
-                            if [ -z "$imageTag" ]; then
-                                echo "Error: Image tag not found in frontend-deployment.yaml"
-                                exit 1
-                            fi
-                            
-
-                            echo "Current image line before replacement:"
-                            grep 'image:' frontend-deployment.yaml
-                            
-
-                            sed -i "s|${AWS_ECR_REPO_NAME}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/frontend:${imageTag}|${AWS_ECR_REPO_NAME}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/frontend:${BUILD_NUMBER}|g" frontend-deployment.yaml
-                            
-                            echo "==== Contents of frontend-deployment.yaml AFTER changes ===="
-                            cat frontend-deployment.yaml
-                            
-                            echo "Updated image line:"
-                            grep 'image:' frontend-deployment.yaml
-                            
-                            git add frontend-deployment.yaml
-                            
-                            git commit -m "Update deployment Image to version ${BUILD_NUMBER}" || echo "No changes to commit"
-                            
+                            echo $imageTag
+                            sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" frontend-deployment.yaml
+                            git add deployment.yaml
+                            git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
                             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                         '''
                     }
