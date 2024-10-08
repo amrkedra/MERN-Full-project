@@ -95,6 +95,7 @@ stage('Update Image Tag') {
     steps {
         script { 
             dir('K8S') {
+                withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')])
                 // Retrieve the current image tag from frontend-deployment.yaml
                 def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' frontend-deployment.yaml", returnStdout: true).trim()
                 echo "Current image tag: ${imageTag}"
@@ -118,7 +119,7 @@ stage('Update Image Tag') {
                 sh """
                     git add frontend-deployment.yaml
                     git commit -m "Update deployment Image to version ${env.BUILD_NUMBER}"
-                    git push https://****@github.com/amrkedra/MERN-Full-project HEAD:main
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                 """
             }
         }
