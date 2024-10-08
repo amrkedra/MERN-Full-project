@@ -91,40 +91,41 @@ pipeline {
             }
         }
 
-stage('Update Image Tag') {
-    steps {
-        script { 
-            dir('K8S') {
-                withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')])
-                // Retrieve the current image tag from frontend-deployment.yaml
-                def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' frontend-deployment.yaml", returnStdout: true).trim()
-                echo "Current image tag: ${imageTag}"
+        stage('Update Image Tag') {
+            steps {
+                script {
+                    // Use withCredentials to access the GitHub token
+                    withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')]) {
+                        dir('K8S') {
+                            // Retrieve the current image tag from frontend-deployment.yaml
+                            def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' frontend-deployment.yaml", returnStdout: true).trim()
+                            echo "Current image tag: ${imageTag}"
 
-                // Extract the base image name (without the tag) and create the new image tag
-                def baseImage = imageTag.tokenize(':')[0]  // Get everything before the ':'
-                def newImageTag = "${baseImage}:${env.BUILD_NUMBER}"  // Create new image tag
-                echo "New image tag: ${newImageTag}"
+                            // Extract the base image name (without the tag) and create the new image tag
+                            def baseImage = imageTag.tokenize(':')[0]  // Get everything before the ':'
+                            def newImageTag = "${baseImage}:${env.BUILD_NUMBER}"  // Create new image tag
+                            echo "New image tag: ${newImageTag}"
 
-                // Update the image tag in frontend-deployment.yaml
-                echo "Updating image tag in frontend-deployment.yaml"
-                sh """
-                    sed -i 's|${imageTag}|${newImageTag}|g' frontend-deployment.yaml
-                """
+                            // Update the image tag in frontend-deployment.yaml
+                            echo "Updating image tag in frontend-deployment.yaml"
+                            sh "sed -i 's|${imageTag}|${newImageTag}|g' frontend-deployment.yaml"
 
-                // Verify the changes made to the frontend-deployment.yaml file
-                echo "Changes made to frontend-deployment.yaml:"
-                sh "cat frontend-deployment.yaml"
+                            // Verify the changes made to the frontend-deployment.yaml file
+                            echo "Changes made to frontend-deployment.yaml:"
+                            sh "cat frontend-deployment.yaml"
 
-                // Add changes to git, commit, and push
-                sh """
-                    git add frontend-deployment.yaml
-                    git commit -m "Update deployment Image to version ${env.BUILD_NUMBER}"
-                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                """
+                            // Add changes to git, commit, and push
+                            sh """
+                                git add frontend-deployment.yaml
+                                git commit -m "Update deployment Image to version ${env.BUILD_NUMBER}"
+                                git push https://${GITHUB_TOKEN}@github.com/${env.GIT_USER_NAME}/${env.GIT_REPO_NAME} HEAD:main
+                            """
+                        }
+                    }
+                }
             }
         }
-    }
-}
+
 
 
     }
