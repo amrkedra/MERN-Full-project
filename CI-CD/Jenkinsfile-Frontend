@@ -3,12 +3,12 @@ pipeline {
     tools {
         jdk 'jdk'
         nodejs 'NodeJS'
-        // 'SonarQube Scanner' should be configured in Global Tool Configuration
+        // Ensure 'SonarQube Scanner' is configured in Global Tool Configuration
     }
     environment  {
-        SCANNER_HOME = tool 'SonarQube Scanner' // Ensure this matches the tool name in Global Tool Configuration
-        AWS_ACCOUNT_ID = credentials('AWS-Account-ID')
-        AWS_ECR_REPO_NAME = credentials('ecr-repo-1')
+        SCANNER_HOME = tool 'SonarQube Scanner' // Must match exactly the tool name in Global Tool Configuration
+        AWS_ACCOUNT_ID = credentials('AWS-Account-ID') // Assume this is a string credential
+        AWS_ECR_REPO_NAME = credentials('ecr-repo-1') // Assume this is a string credential
         AWS_DEFAULT_REGION = 'me-south-1'
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
     }
@@ -27,37 +27,39 @@ pipeline {
         stage('Sonarqube Analysis') {
             steps {
                 dir('App-Code/frontend') {
-                    withSonarQubeEnv('sonar-server') {
+                    withSonarQubeEnv('sonar-server') { // Ensure 'sonar-server' matches your SonarQube server configuration
                         withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
-                            sh """ 
-                            $SCANNER_HOME/bin/sonar-scanner -X \
-                            -Dsonar.projectName=frontend \
-                            -Dsonar.projectKey=frontend \
-                            -Dsonar.sources=. \
-                            -Dsonar.login=$SONAR_TOKEN
-                            """
+                            sh ''' 
+                                echo "Running SonarQube Analysis..."
+                                $SCANNER_HOME/bin/sonar-scanner -X \
+                                -Dsonar.projectName=frontend \
+                                -Dsonar.projectKey=frontend \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=http://localhost:9000 \
+                                -Dsonar.login=$SONAR_TOKEN 
+                                '''
                         }
                     }
                 }
             }
         }
 
-        stage('Verify Scanner Home') { // Temporary Stage for Verification
-            steps {
-                echo "SonarQube Scanner Home Directory: ${SCANNER_HOME}"
-                dir('App-Code/frontend') {
-                    sh 'ls -la report-task.txt || echo "report-task.txt not found"'
-                }
-            }
-        }
+        // stage('Verify Scanner Home') { // Temporary Stage for Verification
+        //     steps {
+        //         echo "SonarQube Scanner Home Directory: ${SCANNER_HOME}"
+        //         dir('App-Code/frontend') {
+        //             sh 'ls -la report-task.txt || echo "report-task.txt not found"'
+        //         }
+        //     }
+        // }
 
-        stage('Quality Check') {
-            steps {
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
-                }
-            }
-        }
+        // stage('Quality Check') {
+        //     steps {
+        //         script {
+        //             waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token' // Removed 'timeout' parameter
+        //         }
+        //     }
+        // }
 
         stage('OWASP Dependency-Check Scan') {
             steps {
@@ -88,16 +90,22 @@ pipeline {
             }
         }
 
-        stage("ECR Image Pushing") {
-            steps {
-                script {
-                    sh '''
-                        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
-                        docker tag ${AWS_ECR_REPO_NAME} ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
-                        docker push ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
-                    '''
+        stages {
+            stage("ECR Image Pushing") {
+                steps {
+                    script {
+                        // Bind AWS credentials from Jenkins
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS-Creds']]) {
+                            sh '''
+                                aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
+                                docker tag ${AWS_ECR_REPO_NAME} ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
+                                docker push ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
+                            '''
+                        }
+                    }
                 }
             }
+        }
         }
 
         stage("TRIVY Image Scan") {

@@ -5,7 +5,7 @@ frontend sonarqube scanner
 sonar-scanner \
   -Dsonar.projectKey=frontend \
   -Dsonar.sources=. \
-  -Dsonar.host.url=http://15.185.210.43:9000 \
+  -Dsonar.host.url=http://localhost:9000 \
   -Dsonar.token=sqp_8d5e40f604e508c4d8539757a1b9676b83d49697
 
 
