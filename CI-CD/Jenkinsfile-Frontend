@@ -122,7 +122,7 @@ pipeline {
                             sh """
                                 git add frontend-deployment.yaml
                                 git commit -m "Update deployment Image to version ${env.BUILD_NUMBER}"
-                                git push https://${GITHUB_TOKEN}@github.com/${env.GIT_USER_NAME}/${env.GIT_REPO_NAME} HEAD:main
+                                git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                             """
                         }
                     }
