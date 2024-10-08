@@ -87,9 +87,10 @@ pipeline {
         }
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'GIHUB-Creds', url: 'https://github.com/amrkedra/MERN-Full-project.git'
+                git branch: 'main', credentialsId: 'GIHUB-Creds', url: 'https://github.com/amrkedra/MERN-Full-project.git'
             }
         }
+
         stage('Update Deployment file') {
             environment {
                 GIT_REPO_NAME = "MERN-Full-project"
