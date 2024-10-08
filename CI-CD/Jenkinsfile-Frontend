@@ -27,13 +27,21 @@ pipeline {
             steps {
                 dir('App-Code/frontend') {
                     withSonarQubeEnv('sonar-server') {
-                        sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName=frontend \
-                        -Dsonar.projectKey=frontend'''
-                    }
+                        script {
+                            sh ''' 
+                            $SCANNER_HOME/bin/sonar-scanner -X \
+                            -Dsonar.projectName=frontend \
+                            -Dsonar.projectKey=frontend \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://localhost:9000 \
+                            -Dsonar.token=${credentials('sonarqube-token')}
+                            '''
                 }
             }
         }
+    }
+}
+
         stage('Quality Check') {
             steps {
                 script {
