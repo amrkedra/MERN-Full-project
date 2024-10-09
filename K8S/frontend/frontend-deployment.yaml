@@ -25,7 +25,7 @@ spec:
       - name: image-pull-secret-repo-1
       containers:
       - name: frontend
-        image: 729207654069.dkr.ecr.me-south-1.amazonaws.com/frontend:49
+        image: 729207654069.dkr.ecr.me-south-1.amazonaws.com/frontend:50
         imagePullPolicy: Always
         env:
         - name: REACT_APP_BACKEND_URL
