@@ -30,7 +30,6 @@ pipeline {
                             sh '''
                                 echo "Running SonarQube Analysis..."
                                 $SCANNER_HOME/bin/sonar-scanner -X \
-                                -Dsonar.projectName=backend \
                                 -Dsonar.projectKey=backend \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=http://localhost:9000 \
