@@ -26,7 +26,7 @@ pipeline {
             steps {
                 dir('App-Code/backend') {
                     withSonarQubeEnv('sonar-server') { // Ensure 'sonar-server' matches your SonarQube server configuration
-                        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                        withCredentials([string(credentialsId: 'sonarqube-backend-token', variable: 'SONAR_TOKEN')]) {
                             sh '''
                                 echo "Running SonarQube Analysis..."
                                 $SCANNER_HOME/bin/sonar-scanner -X \
