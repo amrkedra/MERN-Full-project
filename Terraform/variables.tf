@@ -221,3 +221,7 @@ variable "region" {
 }
 
 
+variable "repository_count" {
+  type = number
+
+}

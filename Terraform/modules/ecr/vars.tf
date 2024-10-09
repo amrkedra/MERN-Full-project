@@ -16,3 +16,8 @@ variable "image_tag_mutability" {
 
 }
 
+# Define the number of ECR repositories to create dynamically
+variable "repository_count" {
+  type    = number
+
+}

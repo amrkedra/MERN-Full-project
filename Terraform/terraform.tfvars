@@ -9,6 +9,7 @@ cidr_block                  = "10.0.0.0/16"
 availability_zones          = ["me-south-1a", "me-south-1b", "me-south-1c"]
 private_key_path            = "/home/amr-kedra/First-DevOps-Repo-For-Organization/Terraform/key-bahrain.pem"
 repository_name             = "ecr-repo-1"
+repository_count            = "2"
 image_tag_mutability        = "MUTABLE"
 vpc_cidr                    = "10.0.0.0/16"   # Ensure this covers all subnets
 cluster_cidr_blocks         = ["10.0.0.0/16"] # No change required here

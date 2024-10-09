@@ -38,6 +38,7 @@ module "ecr" {
   repository_name      = var.repository_name
   image_tag_mutability = var.image_tag_mutability
   env                  = var.env
+  repository_count     = var.repository_count
 
 }
 
@@ -72,22 +73,22 @@ output "jump_server_ip" {
 }
 
 output "jump_server_private_ip" {
-  value       = module.Jenkins-Jump-Servers.jump_server_private_ip  # Access the private IP from the module output
+  value       = module.Jenkins-Jump-Servers.jump_server_private_ip # Access the private IP from the module output
   description = "The private IP address of the jump server"
 }
 
 module "eks" {
-  source             = "./modules/eks" # Path to your EKS module
-  vpc_id             = module.vpc.vpc_id
-  public_subnet_ids  = module.vpc.public_subnet_ids
-  private_subnet_ids = module.vpc.private_subnet_ids
-  node_group_name    = "my-node-group" # Replace with your desired node group name
-  desired_capacity   = var.desired_capacity                                 # Number of desired nodes
-  max_capacity       = var.max_capacity                                 # Maximum number of nodes
-  min_capacity       = var.min_capacity                                 # Minimum number of nodes
-  region             = var.region     # Specify the region for the EKS cluster
-  cluster_name       = var.cluster_name # Specify the name for the EKS cluster
-  cidr_block         = var.vpc_cidr
+  source                 = "./modules/eks" # Path to your EKS module
+  vpc_id                 = module.vpc.vpc_id
+  public_subnet_ids      = module.vpc.public_subnet_ids
+  private_subnet_ids     = module.vpc.private_subnet_ids
+  node_group_name        = "my-node-group"      # Replace with your desired node group name
+  desired_capacity       = var.desired_capacity # Number of desired nodes
+  max_capacity           = var.max_capacity     # Maximum number of nodes
+  min_capacity           = var.min_capacity     # Minimum number of nodes
+  region                 = var.region           # Specify the region for the EKS cluster
+  cluster_name           = var.cluster_name     # Specify the name for the EKS cluster
+  cidr_block             = var.vpc_cidr
   jump_server_private_ip = module.Jenkins-Jump-Servers.jump_server_private_ip
 }
 
