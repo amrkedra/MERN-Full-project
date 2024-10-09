@@ -2,10 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata: 
   name: api
-  namespace: three-tier
+  namespace: MERN
   labels: 
     role: api
-    env: demo
+    env: dev
 spec: 
   replicas: 2
   strategy: 

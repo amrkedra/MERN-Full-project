@@ -2,10 +2,10 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mongo-volume-claim
-  namespace: three-tier
-spec: 
-  accessModes:  
-    - ReadWriteOnce
+  namespace: mern
+spec:
+  accessModes:
+  - ReadWriteOnce
   storageClassName: ""
   resources:
     requests:

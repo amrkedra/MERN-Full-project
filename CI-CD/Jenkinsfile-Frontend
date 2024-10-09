@@ -109,7 +109,7 @@ pipeline {
                 script {
                     // Use withCredentials to access the GitHub token
                     withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')]) {
-                        dir('K8S') {
+                        dir('K8S/frontend') {
                             // Retrieve the current image tag from frontend-deployment.yaml
                             def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' frontend-deployment.yaml", returnStdout: true).trim()
                             echo "Current image tag: ${imageTag}"
