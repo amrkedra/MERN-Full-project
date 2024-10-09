@@ -41,6 +41,15 @@ pipeline {
                 }
             }
         }
+
+        stage('Quality Check') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token' 
+                }
+            }
+        }
+
         stage('OWASP Dependency-Check Scan') {
             steps {
                 dir('App-Code/frontend') {
