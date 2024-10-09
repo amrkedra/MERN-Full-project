@@ -5,6 +5,7 @@ resource "aws_ecr_repository" "ecr_repos" {
   count                = var.repository_count
   name                 = "ecr-repo-${count.index + 1}"  # Creates ecr_repo-1, ecr_repo-2, etc.
   image_tag_mutability = var.image_tag_mutability
+  force_delete         = true
   tags = {
     Environment = var.env[0]
     Project     = "MyProject"
