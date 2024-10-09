@@ -1,14 +1,14 @@
 pipeline {
-    agent any 
+    agent any
     tools {
         jdk 'jdk'
-        nodejs 'nodejs'
+        nodejs 'NodeJS'
     }
-    environment  {
-        SCANNER_HOME=tool 'sonar-scanner'
-        AWS_ACCOUNT_ID = credentials('ACCOUNT_ID')
-        AWS_ECR_REPO_NAME = credentials('ECR_REPO2')
-        AWS_DEFAULT_REGION = 'us-east-1'
+    environment {
+        SCANNER_HOME = tool 'SonarQube Scanner' // Must match exactly the tool name in Global Tool Configuration
+        AWS_ACCOUNT_ID = credentials('AWS-Account-ID') // Assume this is a string credential
+        AWS_ECR_REPO_NAME = credentials('ecr-repo-2') // Assume this is a string credential
+        AWS_DEFAULT_REGION = 'me-south-1'
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
     }
     stages {
@@ -19,30 +19,31 @@ pipeline {
         }
         stage('Checkout from Git') {
             steps {
-                git credentialsId: 'GITHUB', url: 'https://github.com/AmanPathak-DevOps/End-to-End-Kubernetes-Three-Tier-DevSecOps-Project.git'
+                git branch: 'main', credentialsId: 'GIHUB-Creds', url: 'https://github.com/amrkedra/MERN-Full-project.git'
             }
         }
         stage('Sonarqube Analysis') {
             steps {
-                dir('Application-Code/backend') {
-                    withSonarQubeEnv('sonar-server') {
-                        sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName=three-tier-backend \
-                        -Dsonar.projectKey=three-tier-backend '''
+                dir('App-Code/backend') {
+                    withSonarQubeEnv('sonar-server') { // Ensure 'sonar-server' matches your SonarQube server configuration
+                        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                            sh '''
+                                echo "Running SonarQube Analysis..."
+                                $SCANNER_HOME/bin/sonar-scanner -X \
+                                -Dsonar.projectName=backend \
+                                -Dsonar.projectKey=backend \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=http://localhost:9000 \
+                                -Dsonar.login=$SONAR_TOKEN
+                            '''
+                        }
                     }
-                }
-            }
-        }
-        stage('Quality Check') {
-            steps {
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token' 
                 }
             }
         }
         stage('OWASP Dependency-Check Scan') {
             steps {
-                dir('Application-Code/backend') {
+                dir('App-Code/backend') {
                     dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
                     dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
@@ -50,7 +51,7 @@ pipeline {
         }
         stage('Trivy File Scan') {
             steps {
-                dir('Application-Code/backend') {
+                dir('App-Code/backend') {
                     sh 'trivy fs . > trivyfs.txt'
                 }
             }
@@ -58,7 +59,7 @@ pipeline {
         stage("Docker Image Build") {
             steps {
                 script {
-                    dir('Application-Code/backend') {
+                    dir('App-Code/backend') {
                             sh 'docker system prune -f'
                             sh 'docker container prune -f'
                             sh 'docker build -t ${AWS_ECR_REPO_NAME} .'
@@ -82,29 +83,43 @@ pipeline {
         }
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'GITHUB', url: 'https://github.com/AmanPathak-DevOps/End-to-End-Kubernetes-Three-Tier-DevSecOps-Project.git'
+                git branch: 'main', credentialsId: 'GIHUB-Creds', url: 'https://github.com/amrkedra/MERN-Full-project.git'
             }
         }
-        stage('Update Deployment file') {
+        stage('Update Image Tag') {
             environment {
-                GIT_REPO_NAME = "End-to-End-Kubernetes-Three-Tier-DevSecOps-Project"
-                GIT_USER_NAME = "AmanPathak-DevOps"
+                GIT_REPO_NAME = "MERN-Full-project"
+                GIT_USER_NAME = "amrkedra"
             }
             steps {
-                dir('Kubernetes-Manifests-file/Backend') {
-                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                        sh '''
-                            git config user.email "aman07pathak@gmail.com"
-                            git config user.name "AmanPathak-DevOps"
-                            BUILD_NUMBER=${BUILD_NUMBER}
-                            echo $BUILD_NUMBER
-                            imageTag=$(grep -oP '(?<=backend:)[^ ]+' deployment.yaml)
-                            echo $imageTag
-                            sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" deployment.yaml
-                            git add deployment.yaml
-                            git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
-                            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:master
-                        '''
+                script {
+                    // Use withCredentials to access the GitHub token
+                    withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')]) {
+                        dir('K8S') {
+                            // Retrieve the current image tag from frontend-deployment.yaml
+                            def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' backend-deployment.yaml", returnStdout: true).trim()
+                            echo "Current image tag: ${imageTag}"
+
+                            // Extract the base image name (without the tag) and create the new image tag
+                            def baseImage = imageTag.tokenize(':')[0]  // Get everything before the ':'
+                            def newImageTag = "${baseImage}:${env.BUILD_NUMBER}"  // Create new image tag
+                            echo "New image tag: ${newImageTag}"
+
+                            // Update the image tag in frontend-deployment.yaml
+                            echo "Updating image tag in backend-deployment.yaml"
+                            sh "sed -i 's|${imageTag}|${newImageTag}|g' backend-deployment.yaml"
+
+                            // Verify the changes made to the frontend-deployment.yaml file
+                            echo "Changes made to backend-deployment.yaml:"
+                            sh "cat backend-deployment.yaml"
+
+                            // Add changes to git, commit, and push
+                            sh """
+                                git add backend-deployment.yaml
+                                git commit -m "Update backend-deployment Image to version ${env.BUILD_NUMBER}"
+                                git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                            """
+                        }
                     }
                 }
             }
