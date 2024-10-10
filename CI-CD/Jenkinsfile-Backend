@@ -59,9 +59,11 @@ pipeline {
             steps {
                 script {
                     dir('App-Code/backend') {
-                            sh 'docker system prune -f'
-                            sh 'docker container prune -f'
-                            sh 'docker build -t ${AWS_ECR_REPO_NAME} .'
+                        sh '''
+                            docker system prune -f
+                            docker container prune -f
+                            docker build -t ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:latest .
+                        '''
                     }
                 }
             }
@@ -72,7 +74,7 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS-Creds']]) {
                         sh '''
                             aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
-                            docker tag ${AWS_ECR_REPO_NAME} ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
+                            docker tag ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:latest ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
                             docker push ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
                         '''
                     }
@@ -93,35 +95,44 @@ pipeline {
             environment {
                 GIT_REPO_NAME = "MERN-Full-project"
                 GIT_USER_NAME = "amrkedra"
+                GIT_USER_EMAIL = "amrkedra.1993@gmail.com" // Add your Git user email here
             }
             steps {
                 script {
                     // Use withCredentials to access the GitHub token
                     withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')]) {
                         dir('K8S/backend') {
-                            // Retrieve the current image tag from frontend-deployment.yaml
-                            def imageTag = sh(script: "grep -oP '(?<=image: )[^ ]+' backend-deployment.yaml", returnStdout: true).trim()
-                            echo "Current image tag: ${imageTag}"
+                            sh '''
+                                # Exit immediately if a command exits with a non-zero status
+                                set -e
 
-                            // Extract the base image name (without the tag) and create the new image tag
-                            def baseImage = imageTag.tokenize(':')[0]  // Get everything before the ':'
-                            def newImageTag = "${baseImage}:${env.BUILD_NUMBER}"  // Create new image tag
-                            echo "New image tag: ${newImageTag}"
+                                # Configure Git with user name and email
+                                git config user.name "${GIT_USER_NAME}"
+                                git config user.email "${GIT_USER_EMAIL}"
 
-                            // Update the image tag in frontend-deployment.yaml
-                            echo "Updating image tag in backend-deployment.yaml"
-                            sh "sed -i 's|${imageTag}|${newImageTag}|g' backend-deployment.yaml"
+                                # Fetch the current image tag from backend-deployment.yaml
+                                imageTag=$(grep -oP "(?<=image: ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:)[^ ]+" backend-deployment.yaml)
+                                echo "Current image tag: $imageTag"
 
-                            // Verify the changes made to the frontend-deployment.yaml file
-                            echo "Changes made to backend-deployment.yaml:"
-                            sh "cat backend-deployment.yaml"
+                                # Replace the image tag with the new BUILD_NUMBER
+                                sed -i "s|${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${imageTag}|${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}|" backend-deployment.yaml
 
-                            // Add changes to git, commit, and push
-                            sh """
+                                # Check the updated file
+                                echo "Updated backend-deployment.yaml:"
+                                cat backend-deployment.yaml
+
+                                # Stage the updated file
                                 git add backend-deployment.yaml
-                                git commit -m "Update backend-deployment Image to version ${env.BUILD_NUMBER}"
-                                git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                            """
+
+                                # Commit the changes if there are any
+                                if ! git diff --cached --quiet; then
+                                    git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
+                                    # Push the changes to the main branch
+                                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                                else
+                                    echo "No changes to commit."
+                                fi
+                            '''
                         }
                     }
                 }
