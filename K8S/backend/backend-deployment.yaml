@@ -25,7 +25,7 @@ spec:
       - name: backend-repo-secret
       containers:
       - name: api
-        image: 729207654069.dkr.ecr.me-south-1.amazonaws.com/ecr-repo-2:21
+        image: 729207654069.dkr.ecr.me-south-1.amazonaws.com/ecr-repo-2:22
         imagePullPolicy: Always
         env:
         - name: MONGO_CONN_STR
