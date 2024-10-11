@@ -12,7 +12,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-  - host: mern.app
+  - host: mern.link
     http:
       paths:
       - path: /api
