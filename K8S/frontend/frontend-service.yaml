@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mern
-  namespace: default
+  name: frontend
+  namespace: mern
 spec:
   ports:
   - port: 3000
