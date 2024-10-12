@@ -1,3 +1,5 @@
+//this is the pipeline for the infrastructure provisioning and to be run on the local jenkins server
+
 pipeline {
     agent any
 
