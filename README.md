@@ -4,18 +4,16 @@
 
 Welcome to the End-to-End DevSecOps Kubernetes Project guide! In this comprehensive project, we will walk through the process of setting up a robust Three-Tier architecture on AWS using Kubernetes, DevOps best practices, and security measures. This project aims to provide hands-on experience in deploying, securing, and monitoring a scalable application environment.
 
+- High Level Overview of the project.
+  
+![image](https://github.com/user-attachments/assets/ab093310-7b81-4424-be5a-543fbe93c2ca)
 
-MERN stands for:
 
+- MERN stands for:
 1- Mongo DB (Database)
-
 2- Express.js
-
 3- React.js (frontent)
-
 4- Node.js (backend)
-
-
 
 
 ## Table Of Contents
@@ -64,11 +62,14 @@ MERN stands for:
 ## 1. Introduction
 
 This documentation outlines the steps taken to set up a complete DevSecOps pipeline utilizing AWS services, Jenkins for CI/CD, ArgoCD for GitOps, and Prometheus and Grafana for monitoring. The goal is to automate the infrastructure provisioning and application deployment process while maintaining high standards of security and observability.
+
 ## 2. Prerequisites
 
 Before proceeding with the installation and setup, ensure the following tools and services are available:
 
 AWS Account: An active AWS account with permissions to create resources like VPCs, EC2 instances, and EKS.
+![image](https://github.com/user-attachments/assets/26649999-cac7-4352-bbda-7b7616ed025b)
+
 
 Local Machine Setup:
 
@@ -84,6 +85,7 @@ AWS CLI: Installed and configured with the necessary IAM permissions.
 
 Helm: For managing Kubernetes applications.
 
+
 ## 3. Project Overview
 
 This project involves the following main components:
@@ -98,38 +100,7 @@ Security: Integrating security scanning tools like Trivy and SonarQube to ensure
 
 ## 4. Infrastructure Provisioning
 
-    4.1 Local Jenkins Server Setup
-
-Install Jenkins on Your Local Machine:
-
-Follow the installation instructions for your operating system. Refer to the official Jenkins documentation.
-
-Clone the Project Repository:
-
-   
-    git clone https://github.com/amrkedra/MERN-Full-project.git
-    cd MERN-Full-project/CI-CD
-
-Create a New Pipeline in Jenkins:
-
-- Navigate to Jenkins Dashboard > New Item.
-    Choose Pipeline and name it (e.g., Infra-Pipeline).
-    In the pipeline configuration, select Pipeline script from SCM and choose Git.
-    Provide the repository URL and select the Jenkinsfile-infra from your cloned   repository.
-    Add Necessary Credentials to Jenkins:
-
-- Navigate to Manage Jenkins > Manage Credentials.
-
-    Add the required AWS credentials for Jenkins to access AWS resources. 
-
-(Include Screenshot)
-    Run the Pipeline:
-
-- Execute the pipeline to provision the infrastructure.
-
-- Monitor the console output for any errors or confirmation messages.
-
-    4.2 Terraform Setup
+   4.2 Terraform Setup
 
 Install Terraform:
 
@@ -151,7 +122,45 @@ Initialize Terraform:
 
     terraform apply -auto-approve
 
+    4.1 Local Jenkins Server Setup
 
+Install Jenkins on Your Local Machine:
+![Screenshot from 2024-10-03 14-57-34](https://github.com/user-attachments/assets/f3ab5691-302a-4978-9048-951627d91d6a)
+
+
+Follow the installation instructions for your operating system. Refer to the official Jenkins documentation.
+
+Clone the Project Repository:
+
+    git clone https://github.com/amrkedra/MERN-Full-project.git
+    cd MERN-Full-project/CI-CD
+
+Create a New Pipeline in Jenkins:
+
+- Navigate to Jenkins Dashboard > New Item.
+    Choose Pipeline and name it (e.g., Infra-Pipeline).
+    In the pipeline configuration, select Pipeline script from SCM and choose Git.
+    Provide the repository URL and select the Jenkinsfile-infra from your cloned   repository.
+    Add Necessary Credentials to Jenkins:
+
+- Navigate to Manage Jenkins > Manage Credentials.
+
+    Add the required AWS credentials for Jenkins to access AWS resources. 
+
+![Screenshot from 2024-10-12 12-51-05](https://github.com/user-attachments/assets/ba5c24aa-db7e-4968-8336-1c9c75f51a5f)
+    Run the Pipeline:
+
+- Execute the pipeline to provision the infrastructure.
+
+  ![Screenshot from 2024-09-29 20-18-30](https://github.com/user-attachments/assets/fe5a1b9d-5eaf-44f2-96c5-66fc2eabd675)
+
+
+- Monitor the console output for any errors or confirmation messages.
+
+  ![Screenshot from 2024-09-29 15-43-06](https://github.com/user-attachments/assets/ae4ea8e3-d599-43dd-86ce-56b96d9574b4)
+
+
+ 
 
 
     4.3 Ansible Configuration Management
@@ -172,6 +181,7 @@ Execute the following command to set up Jenkins and other necessary configuratio
     
     ansible-playbook -i inventory ansible/setup-jenkins.yml
 
+![Screenshot from 2024-10-13 14-24-37](https://github.com/user-attachments/assets/b735293b-714e-4718-8300-262e34f74a3f)
 
 
 
@@ -185,9 +195,10 @@ The jenkins server & Jump server have been provided already as part of the infra
 
 Open your browser and navigate to:
 
+![Screenshot from 2024-10-03 14-57-34](https://github.com/user-attachments/assets/45b57c99-6c59-4787-b2cc-2a955a66a479)
+
 
 http://<AWS-Jenkins-EC2-Public-IP>:8080
-
 
 
     5.2 CI Pipelines Setup
@@ -523,6 +534,16 @@ Implementation:
         }
     }
 
+
+![Screenshot from 2024-10-08 23-30-53](https://github.com/user-attachments/assets/ead3d0bf-fecb-4071-bb41-e79735b94ed5)
+
+
+![Screenshot from 2024-10-09 15-44-04](https://github.com/user-attachments/assets/3768a492-9c96-47aa-8065-33d93a3ff74b)
+
+
+
+
+
 Details:
 
 Git Configuration: Sets the Git user email and name using environment variables.
@@ -745,9 +766,10 @@ xxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxx.me-south-1.elb.amazonaws.com
 
 this will be the address we will use to access argocd UI.
 
-
-
 Login to ArgoCD:
+
+![Screenshot from 2024-10-05 15-43-48](https://github.com/user-attachments/assets/5fe9f176-51e8-45e8-8a6b-67d63f76dbd1)
+
 
 Default username: admin
 Retrieve the password with:
@@ -762,7 +784,9 @@ Sync Applications:
 Set up application sync with the Git repository containing Kubernetes manifests.
 Monitor the deployment status through the ArgoCD dashboard.
 
-(Add screenshots of the ArgoCD UI and application status)
+![Screenshot from 2024-10-05 15-50-37](https://github.com/user-attachments/assets/81831317-17fa-43f5-941d-cb3c0b1b5f25)
+
+![Screenshot from 2024-10-11 21-27-55](https://github.com/user-attachments/assets/b4216c8c-5e2e-4166-bdca-64fa3ea341f0)
 
 
 ## 7. Monitoring with Prometheus & Grafana
@@ -803,13 +827,17 @@ Log in with the default admin credentials.
     username: admin
     password: admin
 
+![image](https://github.com/user-attachments/assets/e2986017-ad6f-4da7-a466-9beb68b6e589)
+
+
 Add Prometheus as a Data Source:
 
 Navigate to Configuration > Data Sources and add Prometheus.
 Import Pre-Built Dashboards:
 
 Import dashboards for monitoring Kubernetes cluster health and application metrics.
-(Include screenshots of Grafana setup and dashboards)
+
+![Screenshot from 2024-10-11 22-08-07](https://github.com/user-attachments/assets/87330242-3f4d-42fc-823d-79368338ee8d)
 
 ## 8. Challenges & Troubleshooting
 
