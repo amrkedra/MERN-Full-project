@@ -477,65 +477,52 @@ Updates the Kubernetes deployment YAML file with the new Docker image tag. Commi
 Implementation:
 
 
-    stage('Update Deployment file') {
-        environment {
-            GIT_REPO_NAME = "MERN-Full-project"
-            GIT_USER_NAME = "amrkedra"
-        }
-        steps {
-            dir('K8S') {
-                withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')]) {
-                    sh '''
-                        # Configure Git
-                        git config user.email "${GIT_USER_EMAIL}"
-                        git config user.name "${GIT_USER_NAME}"
-                        
-                        # Assign build number
-                        BUILD_NUMBER=${BUILD_NUMBER}
-                        echo "Build number: ${BUILD_NUMBER}"
-                        
-                        # Debug: Check contents of frontend-deployment.yaml before changes
-                        echo "==== Contents of frontend-deployment.yaml BEFORE changes ===="
-                        cat frontend-deployment.yaml
-                        
-                        # Extract current image tag
-                        imageTag=$(grep -oP '(?<=image: )[^ ]+' frontend-deployment.yaml)
-                        echo "Extracted image tag: $imageTag"
-                        
-                        # Echo variables
-                        echo "AWS_ECR_REPO_NAME: ${AWS_ECR_REPO_NAME}"
-                        echo "BUILD_NUMBER: ${BUILD_NUMBER}"
-                        
-                        # Check if imageTag is empty
-                        if [ -z "$imageTag" ]; then
-                            echo "Error: Image tag not found in frontend-deployment.yaml"
-                            exit 1
-                        fi
-                        
-                        # Print current image line
-                        echo "Current image line before replacement:"
-                        grep 'image:' frontend-deployment.yaml
-                        
-                        # Replace image tag from latest to build number
-                        sed -i "s|${AWS_ECR_REPO_NAME}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/frontend:${imageTag}|${AWS_ECR_REPO_NAME}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/frontend:${BUILD_NUMBER}|g" frontend-deployment.yaml
-                        
-                        # Debug: Check contents of frontend-deployment.yaml after sed
-                        echo "==== Contents of frontend-deployment.yaml AFTER changes ===="
-                        cat frontend-deployment.yaml
-                        
-                        # Print updated image line
-                        echo "Updated image line:"
-                        grep 'image:' frontend-deployment.yaml
-                        
-                        # Add changes to git, commit, and push
-                        git add frontend-deployment.yaml
-                        git commit -m "Update deployment Image to version ${BUILD_NUMBER}" || echo "No changes to commit"
-                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                    '''
+    stage('Update Image Tag') {
+            environment {
+                GIT_REPO_NAME = "MERN-Full-project"
+                GIT_USER_NAME = "amrkedra"
+                GIT_USER_EMAIL = "amrkedra.1993@gmail.com" // Add your Git user email here
+            }
+            steps {
+                script {
+                    // Use withCredentials to access the GitHub token
+                    withCredentials([string(credentialsId: 'GitHub-Token', variable: 'GITHUB_TOKEN')]) {
+                        dir('K8S/backend') {
+                            sh '''
+                                # Exit immediately if a command exits with a non-zero status
+                                set -e
+
+                                # Configure Git with user name and email
+                                git config user.name "${GIT_USER_NAME}"
+                                git config user.email "${GIT_USER_EMAIL}"
+
+                                # Fetch the current image tag from backend-deployment.yaml
+                                imageTag=$(grep -oP "(?<=image: ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:)[^ ]+" backend-deployment.yaml)
+                                echo "Current image tag: $imageTag"
+
+                                # Replace the image tag with the new BUILD_NUMBER
+                                sed -i "s|${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${imageTag}|${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}|" backend-deployment.yaml
+
+                                # Check the updated file
+                                echo "Updated backend-deployment.yaml:"
+                                cat backend-deployment.yaml
+
+                                # Stage the updated file
+                                git add backend-deployment.yaml
+
+                                # Commit the changes if there are any
+                                if ! git diff --cached --quiet; then
+                                    git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
+                                    # Push the changes to the main branch
+                                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                                else
+                                    echo "No changes to commit."
+                                fi
+                            '''
+                        }
+                    }
                 }
             }
-        }
-    }
 
 
 ![Screenshot from 2024-10-08 23-30-53](https://github.com/user-attachments/assets/ead3d0bf-fecb-4071-bb41-e79735b94ed5)
