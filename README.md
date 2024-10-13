@@ -10,9 +10,13 @@ Welcome to the End-to-End DevSecOps Kubernetes Project guide! In this comprehens
 
 
 - MERN stands for:
+- 
 1- Mongo DB (Database)
+  
 2- Express.js
+
 3- React.js (frontent)
+
 4- Node.js (backend)
 
 
