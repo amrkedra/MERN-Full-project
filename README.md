@@ -9,7 +9,7 @@ Welcome to the End-to-End DevSecOps Kubernetes Project guide! In this comprehens
 ![image](https://github.com/user-attachments/assets/ab093310-7b81-4424-be5a-543fbe93c2ca)
 
 
-- MERN stands for:
+MERN stands for:
   
 1- Mongo DB (Database)
   
