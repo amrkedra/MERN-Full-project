@@ -19,7 +19,6 @@ Welcome to the End-to-End DevSecOps Kubernetes Project guide! In this comprehens
 
 4- Node.js (backend)
 
-
 ## Table Of Contents
 
 1. Introduction
