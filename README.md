@@ -784,6 +784,8 @@ Sync Applications:
 Set up application sync with the Git repository containing Kubernetes manifests.
 Monitor the deployment status through the ArgoCD dashboard.
 
+![Screenshot from 2024-10-05 15-44-43](https://github.com/user-attachments/assets/382b0dc2-f7ee-4b14-a032-4e28a3a0a28e)
+
 ![Screenshot from 2024-10-05 15-50-37](https://github.com/user-attachments/assets/81831317-17fa-43f5-941d-cb3c0b1b5f25)
 
 ![Screenshot from 2024-10-11 21-27-55](https://github.com/user-attachments/assets/b4216c8c-5e2e-4166-bdca-64fa3ea341f0)
