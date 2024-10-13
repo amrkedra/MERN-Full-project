@@ -3,7 +3,7 @@ all:
     AWS-Jenkins-Server:
       hosts:
         aws-jenkins:
-          ansible_host: 157.175.176.126 # Replace with your EC2 instance IP
+          ansible_host: 16.24.105.133 # Replace with your EC2 instance IP
           ansible_user: ubuntu # The username based on your AMI
           ansible_ssh_private_key_file: ./key-bahrain.pem
 

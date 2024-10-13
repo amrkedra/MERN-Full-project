@@ -1,5 +1,5 @@
 - name: Setup-Jenkins-Server
-  hosts: local
+  hosts: aws-jenkins
   become: true
   vars:
     nginx_user: nginx
@@ -63,10 +63,6 @@
     poll: 0     # Don't wait for completion
     ignore_errors: true
 
-  - name: Make sure Sonar container is Running
-    ansible.builtin.shell:
-      docker start sonar
-    ignore_errors: yes
 
 
   - name: Install AWS CLI
