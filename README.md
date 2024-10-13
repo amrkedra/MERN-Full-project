@@ -642,15 +642,19 @@ Dependency-Check Reports: Published within Jenkins job artifacts.
 
 Trivy Reports: Stored as text files (trivyfs.txt and trivyimage.txt) in the workspace.
 
-Troubleshooting
+
+
+Troubleshooting:
+
 
 Common Issues and Resolutions
 
-SonarQube Quality Gate Stuck:
+
+    SonarQube Quality Gate Stuck:
 
 Cause: Webhook not properly configured or SonarQube unable to notify Jenkins.
 
-    Resolution:
+Resolution:
 
 Verify SonarQube webhook settings pointing to http://<JENKINS_URL>/sonarqube-webhook/.
 
@@ -658,40 +662,49 @@ Ensure network connectivity between SonarQube and Jenkins.
 
 Check Jenkins logs for incoming webhook requests.
 
-ECR Repository Already Exists:
+
+
+    ECR Repository Already Exists:
 
 Cause: Manually created ECR repositories are not imported into Terraform state.
 
-    Resolution:
+Resolution:
 
 Import existing repositories using terraform import.
 
 Ensure Terraform configuration matches existing resources.
 
-Docker Push Failures:
+
+
+    Docker Push Failures:
 
 Cause: Incorrect AWS credentials or repository URI.
 
-    Resolution:
+Resolution:
 
 Verify AWS credentials stored in Jenkins.
 
 Ensure the REPOSITORY_URI is correctly constructed.
 
-Git Commit and Push Failures:
+
+
+    Git Commit and Push Failures:
 
 Cause: Invalid GitHub token or repository permissions.
 
-    Resolution:
+Resolution:
+
 Ensure the GitHub token has push permissions.
 
 Verify the GIT_USER_EMAIL and GIT_USER_NAME are correctly set.
 
-Trivy Scan Not Working:
+
+
+    Trivy Scan Not Working:
 
 Cause: Trivy not installed or misconfigured.
 
-    Resolution:
+Resolution:
 
 Ensure Trivy is installed on the Jenkins server.
 
