@@ -24,7 +24,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: /App-Code/frontend/
+          context: ./App-Code/frontend/
           push: true
           # Replace 'username' and 'repo' with your actual Docker Hub info
           tags: ${{ vars.DOCKER_HUB_USER }}/my-awesome-app:latest
